@@ -3,18 +3,24 @@ import 'package:corider/screens/login/login.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 import 'cloud_functions/firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'package:corider/providers/push_notificaions/local_notification_service.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:zego_uikit/zego_uikit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Load environment variables
-  await dotenv.load(fileName: ".env");
+  // await dotenv.load(fileName: ".env");
+  try {
+    await dotenv.load(fileName: '.env');
+    print("LOADED SUCCESSFULLY");
+  } catch (e) {
+    print(e.toString());
+  }
 
   // Set preferred orientation
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -61,6 +67,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     final userState = Provider.of<UserState>(context);
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'CoRider',
       theme: ThemeData(
         primarySwatch: Colors.lightBlue,
@@ -70,7 +77,8 @@ class _MyAppState extends State<MyApp> {
           : RootNavigationView(userState: widget.userState),
       routes: {
         "/login": (context) => LoginScreen(userState: widget.userState),
-        "/dashboard": (context) => RootNavigationView(userState: widget.userState),
+        "/dashboard": (context) =>
+            RootNavigationView(userState: widget.userState),
       },
     );
   }

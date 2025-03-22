@@ -25,7 +25,8 @@ class ExploreRidesScreen extends StatefulWidget {
   State<ExploreRidesScreen> createState() => _ExploreRidesScreenState();
 }
 
-class _ExploreRidesScreenState extends State<ExploreRidesScreen> with TickerProviderStateMixin {
+class _ExploreRidesScreenState extends State<ExploreRidesScreen>
+    with TickerProviderStateMixin {
   int _selectedIndex = 0;
   List<RideOfferModel> offers = [];
   List<RideOfferCard>? rideOfferCards;
@@ -65,12 +66,14 @@ class _ExploreRidesScreenState extends State<ExploreRidesScreen> with TickerProv
   }
 
   void _updateRideOfferCards() {
-    rideOfferCards = offers.map((offer) => RideOfferCard(
-      userState: widget.userState,
-      rideOffer: offer,
-      currentLocation: currentLocation,
-      refreshOffersIndicatorKey: refreshOffersIndicatorKey,
-    )).toList();
+    rideOfferCards = offers
+        .map((offer) => RideOfferCard(
+              userState: widget.userState,
+              rideOffer: offer,
+              currentLocation: currentLocation,
+              refreshOffersIndicatorKey: refreshOffersIndicatorKey,
+            ))
+        .toList();
     _addMarkers();
   }
 
@@ -170,12 +173,22 @@ class _ExploreRidesScreenState extends State<ExploreRidesScreen> with TickerProv
     final userState = Provider.of<UserState>(context);
     final UserModel currentUser = userState.currentUser!;
     offers = userState.storedOffers.values.toList();
+    final primary = Color(0xFF6200EE);
+    final secondary = Color(0xFF9C27B0);
 
     return Scaffold(
       backgroundColor: backgroundWhite,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: primaryPurple,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [secondary, primary],
+            ),
+          ),
+        ),
         title: const Text(
           'Explore Rides',
           style: TextStyle(
@@ -239,7 +252,8 @@ class _ExploreRidesScreenState extends State<ExploreRidesScreen> with TickerProv
                   : CustomMapWidget(
                       markers: _markers,
                       initialCameraPosition: CameraPosition(
-                        target: currentLocation ?? const LatLng(43.7720940, -79.3453741),
+                        target: currentLocation ??
+                            const LatLng(43.7720940, -79.3453741),
                         zoom: currentLocation != null ? 12.0 : 20.0,
                       ),
                       onMapCreated: _onMapCreated,
@@ -318,7 +332,10 @@ class _RideOfferListState extends State<RideOfferList> {
 
   Map<String, double> _dijkstra(LatLng start, List<RideOfferCard> offers) {
     Map<String, Map<String, double>> graph = {};
-    List<LatLng> nodes = [start, ...offers.map((offer) => offer.rideOffer.driverLocation)];
+    List<LatLng> nodes = [
+      start,
+      ...offers.map((offer) => offer.rideOffer.driverLocation)
+    ];
     for (int i = 0; i < nodes.length; i++) {
       graph[nodes[i].toString()] = {};
       for (int j = 0; j < nodes.length; j++) {
@@ -340,7 +357,9 @@ class _RideOfferListState extends State<RideOfferList> {
 
     while (unvisited.isNotEmpty) {
       String currentNode = unvisited.reduce((a, b) =>
-          (distances[a] ?? double.infinity) < (distances[b] ?? double.infinity) ? a : b);
+          (distances[a] ?? double.infinity) < (distances[b] ?? double.infinity)
+              ? a
+              : b);
 
       if (distances[currentNode] == null) break;
 
@@ -363,11 +382,14 @@ class _RideOfferListState extends State<RideOfferList> {
 
   void _sortOffersByShortestPath() {
     if (widget.currentLocation == null) return;
-    Map<String, double> distances = _dijkstra(widget.currentLocation!, widget.rideOfferCards);
+    Map<String, double> distances =
+        _dijkstra(widget.currentLocation!, widget.rideOfferCards);
     List<RideOfferCard> sortedOffers = List.from(widget.rideOfferCards);
     sortedOffers.sort((a, b) {
-      double distA = distances[a.rideOffer.driverLocation.toString()] ?? double.infinity;
-      double distB = distances[b.rideOffer.driverLocation.toString()] ?? double.infinity;
+      double distA =
+          distances[a.rideOffer.driverLocation.toString()] ?? double.infinity;
+      double distB =
+          distances[b.rideOffer.driverLocation.toString()] ?? double.infinity;
       return distA.compareTo(distB);
     });
     _rebuildOffers(sortedOffers);
@@ -432,9 +454,9 @@ class _RideOfferListState extends State<RideOfferList> {
                 Text(
                   'No rides available',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: primaryPurple,
-                    fontWeight: FontWeight.bold,
-                  ),
+                        color: primaryPurple,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 8),
                 const Text(
@@ -443,13 +465,15 @@ class _RideOfferListState extends State<RideOfferList> {
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
-                  onPressed: () => widget.refreshOffersIndicatorKey.currentState!.show(),
+                  onPressed: () =>
+                      widget.refreshOffersIndicatorKey.currentState!.show(),
                   icon: const Icon(Icons.refresh),
                   label: const Text('Refresh'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryPurple,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
@@ -718,7 +742,8 @@ class ModernRidesFilter extends StatelessWidget {
                       icon: const Icon(Icons.sort, color: primaryPurple),
                       style: const TextStyle(color: primaryPurple),
                       isExpanded: true,
-                      items: RideOfferSortBy.values.map((RideOfferSortBy value) {
+                      items:
+                          RideOfferSortBy.values.map((RideOfferSortBy value) {
                         String label;
                         IconData icon;
                         switch (value) {
@@ -774,7 +799,7 @@ class ModernRidesFilter extends StatelessWidget {
     IconData icon,
   ) {
     final bool isSelected = selectedFilter == filter;
-    
+
     return Expanded(
       child: InkWell(
         onTap: () => onFilterChanged(filter),
@@ -802,7 +827,8 @@ class ModernRidesFilter extends StatelessWidget {
                   label,
                   style: TextStyle(
                     color: isSelected ? Colors.white : primaryPurple,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
                     fontSize: 12,
                   ),
                   overflow: TextOverflow.ellipsis,

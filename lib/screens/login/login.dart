@@ -31,8 +31,8 @@ class LoginScreen extends StatelessWidget {
     return FlutterLogin(
       title: "RideShare",
       userType: LoginUserType.email,
-      savedEmail: "user@user.com", // TODO: Remove this line
-      savedPassword: "123456", // TODO: Remove this line
+      savedEmail: "", // TODO: Remove this line
+      savedPassword: "", // TODO: Remove this line
       // logo: const AssetImage('assets/images/logo.png'),
       onLogin: (data) async {
         final err = await FirebaseFunctions.authUser(data);
