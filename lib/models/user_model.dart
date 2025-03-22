@@ -6,7 +6,6 @@ import 'package:corider/providers/user_state.dart';
 import 'package:corider/utils/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import 'package:flutter_chat_types/flutter_chat_types.dart';
 
 class UserModel {
   final String email;
@@ -19,6 +18,7 @@ class UserModel {
   List<String> myOfferIds;
   List<String> requestedOfferIds;
   List<String> chatRoomIds;
+  bool? showFullName; // Removed 'final' to allow modification
 
   UserModel({
     this.createdAt,
@@ -30,19 +30,22 @@ class UserModel {
     this.myOfferIds = const [],
     this.requestedOfferIds = const [],
     this.chatRoomIds = const [],
+    required this.showFullName,
   }) : companyName = email.split("@")[1];
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-        email: json['email'],
-        firstName: json['firstName'],
-        lastName: json['lastName'],
-        profileImage: json['profileImage'],
-        createdAt: DateTime.parse(json['createdAt']),
-        vehicle: json['vehicle'] != null ? VehicleModel.fromJson(json['vehicle']) : null,
-        myOfferIds: json['myOfferIds'] != null ? List<String>.from(json['myOfferIds']) : [],
-        requestedOfferIds: json['requestedOfferIds'] != null ? List<String>.from(json['requestedOfferIds']) : [],
-        chatRoomIds: json['chatRoomIds'] != null ? List<String>.from(json['chatRoomIds']) : []);
+      email: json['email'],
+      firstName: json['firstName'],
+      lastName: json['lastName'],
+      profileImage: json['profileImage'],
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
+      vehicle: json['vehicle'] != null ? VehicleModel.fromJson(json['vehicle']) : null,
+      myOfferIds: json['myOfferIds'] != null ? List<String>.from(json['myOfferIds']) : [],
+      requestedOfferIds: json['requestedOfferIds'] != null ? List<String>.from(json['requestedOfferIds']) : [],
+      chatRoomIds: json['chatRoomIds'] != null ? List<String>.from(json['chatRoomIds']) : [],
+      showFullName: json['showFullName'] ?? true,
+    );
   }
 
   Map<String, dynamic> toJson() => {
@@ -50,16 +53,17 @@ class UserModel {
         "firstName": firstName,
         "lastName": lastName,
         "profileImage": profileImage,
-        "createdAt": createdAt!.toIso8601String(),
+        "createdAt": createdAt?.toIso8601String(),
         "vehicle": vehicle?.toJson(),
         "myOfferIds": myOfferIds,
         "requestedOfferIds": requestedOfferIds,
         "chatRoomIds": chatRoomIds,
+        "showFullName": showFullName,
       };
 
   String get fullName => '$firstName $lastName';
 
-  User toChatUser() => User(
+  types.User toChatUser() => types.User(
         id: email,
         firstName: firstName,
         lastName: lastName,
@@ -67,6 +71,13 @@ class UserModel {
       );
 
   String messageChannelId() => '$email-channel';
+
+  // New method to save name visibility
+  Future<String?> saveNameVisibility(UserState userState, bool newValue) async {
+    showFullName = newValue; // Update local instance
+    userState.setCurrentUser(this); // Sync with UserState
+    return null; // Return null to indicate success (consistent with other methods)
+  }
 
   //#region User Intents
   Future<String?> createRideOffer(UserState userState, RideOfferModel offer) async {
@@ -176,3 +187,4 @@ class UserModel {
   }
   //#endregion
 }
+

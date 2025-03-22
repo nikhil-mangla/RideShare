@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyDWgIGTHRgiEWlImV7-zfTo-IUq4RzWMzg</string>
+	<string>AIzaSyBzs0zB1PSt_srloEajISXRc5uvxqcUA10</string>
 	<key>GCM_SENDER_ID</key>
-	<string>255313947969</string>
+	<string>72996944730</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.corider</string>
+	<string>com.example.RideShare</string>
 	<key>PROJECT_ID</key>
-	<string>corider-b3661</string>
+	<string>rideshare-b3eea</string>
 	<key>STORAGE_BUCKET</key>
-	<string>corider-b3661.appspot.com</string>
+	<string>rideshare-b3eea.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:255313947969:ios:a3ef6eaa00f0fbe4be05c0</string>
+	<string>1:72996944730:ios:e5ab0d880ed7d4dc499163</string>
 </dict>
 </plist>

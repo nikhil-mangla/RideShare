@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app needs access to location to show nearby rides.</string>
+	<string>We need your location to provide you with accurate ride suggestions and directions while using CoRider.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>This app needs access to location to show nearby rides even when in background.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
@@ -30,14 +30,14 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We need your location to provide you with accurate ride suggestions and directions while using CoRider.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

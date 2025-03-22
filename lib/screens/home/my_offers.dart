@@ -8,7 +8,7 @@ import 'package:corider/models/ride_offer_model.dart';
 class MyOffers extends StatefulWidget {
   final UserState userState;
   final Function() fetchAllOffers;
-  const MyOffers({Key? key, required this.userState, required this.fetchAllOffers}) : super(key: key);
+  const MyOffers({super.key, required this.userState, required this.fetchAllOffers});
 
   @override
   MyOffersState createState() => MyOffersState();

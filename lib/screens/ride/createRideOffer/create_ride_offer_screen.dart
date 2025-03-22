@@ -16,7 +16,7 @@ final List<String> weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 class CreateRideOfferScreen extends StatefulWidget {
   final GlobalKey<RefreshIndicatorState>? refreshOffersIndicatorKey;
 
-  const CreateRideOfferScreen({Key? key, this.refreshOffersIndicatorKey}) : super(key: key);
+  const CreateRideOfferScreen({super.key, this.refreshOffersIndicatorKey});
 
   @override
   _CreateRideOfferScreenState createState() => _CreateRideOfferScreenState();

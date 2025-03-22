@@ -15,12 +15,11 @@ class RideOfferCard extends StatefulWidget {
   final GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey;
 
   const RideOfferCard(
-      {Key? key,
+      {super.key,
       required this.userState,
       required this.rideOffer,
       required this.currentLocation,
-      required this.refreshOffersIndicatorKey})
-      : super(key: key);
+      required this.refreshOffersIndicatorKey});
 
   @override
   State<RideOfferCard> createState() => _RideOfferCardState();
@@ -75,7 +74,11 @@ class _RideOfferCardState extends State<RideOfferCard> {
                     driver!.profileImage == null ? Utils.getUserAvatarNameColor(widget.rideOffer.driverId) : null,
                 child: driver!.profileImage == null
                     ? Text(
-                        '${driver!.firstName[0].toUpperCase()}${driver!.lastName[0].toUpperCase()}',
+                        driver!.firstName.isNotEmpty && driver!.lastName.isNotEmpty
+                            ? '${driver!.firstName[0].toUpperCase()}${driver!.lastName[0].toUpperCase()}'
+                            : driver!.firstName.isNotEmpty
+                                ? driver!.firstName[0].toUpperCase()
+                                : '',
                         style: const TextStyle(color: Colors.white),
                       )
                     : ClipOval(
@@ -117,7 +120,9 @@ class _RideOfferCardState extends State<RideOfferCard> {
                   ),
                   const SizedBox(width: 4.0),
                   Text(
-                    widget.rideOffer.proposedLeaveTime!.format(context),
+                    widget.rideOffer.proposedLeaveTime != null 
+                        ? widget.rideOffer.proposedLeaveTime!.format(context)
+                        : 'N/A',
                     style: const TextStyle(fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(width: 8.0),
@@ -127,7 +132,9 @@ class _RideOfferCardState extends State<RideOfferCard> {
                   ),
                   const SizedBox(width: 4.0),
                   Text(
-                    widget.rideOffer.proposedBackTime!.format(context),
+                    widget.rideOffer.proposedBackTime != null 
+                        ? widget.rideOffer.proposedBackTime!.format(context)
+                        : 'N/A',
                     style: const TextStyle(fontWeight: FontWeight.w500),
                   ),
                 ],
@@ -201,6 +208,10 @@ class _RideOfferCardState extends State<RideOfferCard> {
 
   @override
   Widget build(BuildContext context) {
+    // Debug information to track ride offer details
+    debugPrint("Building RideOfferCard for offer ID: ${widget.rideOffer.id}");
+    debugPrint("Driver location name: ${widget.rideOffer.driverLocationName}");
+    
     return GestureDetector(
         onTap: () {
           // Navigate to ride offer details page
@@ -231,7 +242,7 @@ class _RideOfferCardState extends State<RideOfferCard> {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8.0),
-                    Text(widget.rideOffer.driverLocationName),
+                    Text(widget.rideOffer.driverLocationName ?? 'Location not provided'),
                   ],
                 ),
               ),

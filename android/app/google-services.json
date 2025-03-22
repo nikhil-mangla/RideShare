@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "255313947969",
-    "project_id": "corider-b3661",
-    "storage_bucket": "corider-b3661.appspot.com"
+    "project_number": "72996944730",
+    "project_id": "rideshare-b3eea",
+    "storage_bucket": "rideshare-b3eea.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:255313947969:android:71d52551bb956274be05c0",
+        "mobilesdk_app_id": "1:72996944730:android:8adc4dcdf9735500499163",
         "android_client_info": {
-          "package_name": "com.example.corider"
+          "package_name": "com.example.RideShare"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAF0tuH6N0JDQRAgc9JMIpHfFxDevYC_vk"
+          "current_key": "AIzaSyBzs0zB1PSt_srloEajISXRc5uvxqcUA10"
         }
       ],
       "services": {

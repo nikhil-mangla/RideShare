@@ -7,10 +7,10 @@ class RidesFilter extends StatefulWidget {
   final Function(RideOfferSortBy) onSortChanged;
 
   const RidesFilter({
-    Key? key,
+    super.key,
     required this.onFilterChanged,
     required this.onSortChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<RidesFilter> createState() => _RidesFilterState();

@@ -11,8 +11,7 @@ class UpcomingRides extends StatefulWidget {
   final Function() fetchAllOffers;
   final Function(int) changePageIndex;
 
-  const UpcomingRides({Key? key, required this.userState, required this.fetchAllOffers, required this.changePageIndex})
-      : super(key: key);
+  const UpcomingRides({super.key, required this.userState, required this.fetchAllOffers, required this.changePageIndex});
 
   @override
   UpcomingRidesState createState() => UpcomingRidesState();

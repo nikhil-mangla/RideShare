@@ -1,6 +1,6 @@
 enum RideOfferFilter {
   // ignore: constant_identifier_names
-  ALL,
+  All,
   others,
   byMe,
 }

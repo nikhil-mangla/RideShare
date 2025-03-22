@@ -100,7 +100,7 @@ List<String> colors = [
 
 class AddVehiclePage extends StatefulWidget {
   final VehicleModel? vehicle;
-  const AddVehiclePage({Key? key, required this.vehicle}) : super(key: key);
+  const AddVehiclePage({super.key, required this.vehicle});
 
   @override
   State<AddVehiclePage> createState() => _AddVehiclePageState();

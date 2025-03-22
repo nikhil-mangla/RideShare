@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 class HomeScreen extends StatefulWidget {
   final Function(int) changePageIndex;
   final UserState userState;
-  const HomeScreen({Key? key, required this.userState, required this.changePageIndex}) : super(key: key);
+  const HomeScreen({super.key, required this.userState, required this.changePageIndex});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('CoRider'),
+        title: const Text('RideShare'),
         actions: [
           Stack(alignment: Alignment.center, children: [
             IconButton(

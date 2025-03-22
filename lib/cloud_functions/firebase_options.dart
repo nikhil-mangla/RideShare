@@ -24,8 +24,6 @@ class DefaultFirebaseOptions {
         return android;
       case TargetPlatform.iOS:
         return ios;
-      case TargetPlatform.macOS:
-        return macos;
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -44,38 +42,29 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBJHzLmEBHeMnfZh0jQJ8NzzwVzYBZOlhw',
-    appId: '1:255313947969:web:8556c20be54b4cb4be05c0',
-    messagingSenderId: '255313947969',
-    projectId: 'corider-b3661',
-    authDomain: 'corider-b3661.firebaseapp.com',
-    storageBucket: 'corider-b3661.appspot.com',
+    apiKey: 'AIzaSyBzs0zB1PSt_srloEajISXRc5uvxqcUA10',
+    appId: '1:72996944730:web:a4b0803b765a328f499163',
+    messagingSenderId: '72996944730',
+    projectId: 'rideshare-b3eea',
+    authDomain: 'rideshare-b3eea.firebaseapp.com',
+    storageBucket: 'rideshare-b3eea.appspot.com',
     measurementId: 'G-NZ2VR64G1B',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAF0tuH6N0JDQRAgc9JMIpHfFxDevYC_vk',
-    appId: '1:255313947969:android:71d52551bb956274be05c0',
-    messagingSenderId: '255313947969',
-    projectId: 'corider-b3661',
-    storageBucket: 'corider-b3661.appspot.com',
+    apiKey: 'AIzaSyBzs0zB1PSt_srloEajISXRc5uvxqcUA10',
+    appId: '1:72996944730:android:8adc4dcdf9735500499163',
+    messagingSenderId: '72996944730',
+    projectId: 'rideshare-b3eea',
+    storageBucket: 'rideshare-b3eea.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDWgIGTHRgiEWlImV7-zfTo-IUq4RzWMzg',
-    appId: '1:255313947969:ios:a3ef6eaa00f0fbe4be05c0',
-    messagingSenderId: '255313947969',
-    projectId: 'corider-b3661',
-    storageBucket: 'corider-b3661.appspot.com',
-    iosBundleId: 'com.example.corider',
-  );
-
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDWgIGTHRgiEWlImV7-zfTo-IUq4RzWMzg',
-    appId: '1:255313947969:ios:7624a3c480753e99be05c0',
-    messagingSenderId: '255313947969',
-    projectId: 'corider-b3661',
-    storageBucket: 'corider-b3661.appspot.com',
-    iosBundleId: 'com.example.corider.RunnerTests',
+    apiKey: 'AIzaSyBzs0zB1PSt_srloEajISXRc5uvxqcUA10',
+    appId: '1:72996944730:ios:e5ab0d880ed7d4dc499163',
+    messagingSenderId: '72996944730',
+    projectId: 'rideshare-b3eea',
+    storageBucket: 'rideshare-b3eea.appspot.com',
+    iosBundleId: 'com.example.RideShare',
   );
 }

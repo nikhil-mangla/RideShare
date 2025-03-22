@@ -14,7 +14,20 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_login/flutter_login.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
+
+
 class FirebaseFunctions {
+  static Future<void> updateNameVisibility(UserModel user, bool isVisible) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.email) // Assuming email is used as a unique ID
+          .update({'showFullName': isVisible});
+    } catch (e) {
+      print('Error updating name visibility: $e');
+    }
+  }
+
   static Future<String?> changeRideRequestStatusWithUserId(
       UserModel user, String rideOfferId, String userId, RequestedOfferStatus status) async {
     try {
@@ -449,53 +462,55 @@ class FirebaseFunctions {
   }
 
   static Future<String?> signupUser(SignupData data) async {
-    debugPrint('Signup Name: ${data.name}, Password: ${data.password}');
-    try {
-      await Firebase.initializeApp(); // Initialize Firebase
-      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: data.name!,
-        password: data.password!,
-      );
+  debugPrint('Signup Name: ${data.name}, Password: ${data.password}');
+  try {
+    await Firebase.initializeApp(); // Initialize Firebase
+    UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: data.name!,
+      password: data.password!,
+    );
 
-      final db = FirebaseFirestore.instance;
+    final db = FirebaseFirestore.instance;
 
-      final user = UserModel(
-          email: data.name!,
-          createdAt: DateTime.now(),
-          firstName: data.additionalSignupData!['firstName']!,
-          lastName: data.additionalSignupData!['lastName']!,
-          chatRoomIds: ['default', Utils.getUserChannelId(data.name!)]);
-      final userJson = user.toJson();
-      await db
-          .collection("users")
-          .doc(user.email)
-          .set(userJson)
-          .then((_) => debugPrint('DocumentSnapshot added with ID: ${user.email}'));
+    final user = UserModel(
+      email: data.name!,
+      createdAt: DateTime.now(),
+      firstName: data.additionalSignupData!['firstName']!,
+      lastName: data.additionalSignupData!['lastName']!,
+      chatRoomIds: ['default', Utils.getUserChannelId(data.name!)],
+      showFullName: true, // Added required parameter with default value
+    );
+    final userJson = user.toJson();
+    await db
+        .collection("users")
+        .doc(user.email)
+        .set(userJson)
+        .then((_) => debugPrint('DocumentSnapshot added with ID: ${user.email}'));
 
-      final types.Room notificationChannel = types.Room(
-        id: user.messageChannelId(),
-        name: 'Notifications',
-        users: [types.User(id: user.email)],
-        type: types.RoomType.channel,
-        createdAt: DateTime.now().millisecondsSinceEpoch,
-      );
-      final notificationChannelJson = notificationChannel.toJson();
-      await db
-          .collection("companies")
-          .doc(user.companyName)
-          .collection('chatRooms')
-          .doc(notificationChannel.id)
-          .set(notificationChannelJson);
+    final types.Room notificationChannel = types.Room(
+      id: user.messageChannelId(),
+      name: 'Notifications',
+      users: [types.User(id: user.email)],
+      type: types.RoomType.channel,
+      createdAt: DateTime.now().millisecondsSinceEpoch,
+    );
+    final notificationChannelJson = notificationChannel.toJson();
+    await db
+        .collection("companies")
+        .doc(user.companyName)
+        .collection('chatRooms')
+        .doc(notificationChannel.id)
+        .set(notificationChannelJson);
 
-      // User added successfully
-      String successMessage = 'User ${userCredential.user} signed up successfully!';
-      debugPrint(successMessage);
-      return null;
-    } catch (e) {
-      // Error occurred while adding user
-      return ('Error adding user: $e');
-    }
+    // User added successfully
+    String successMessage = 'User ${userCredential.user} signed up successfully!';
+    debugPrint(successMessage);
+    return null;
+  } catch (e) {
+    // Error occurred while adding user
+    return ('Error adding user: $e');
   }
+}
 
   static Future<String?> recoverPassword(String name) async {
     debugPrint('Name: $name');

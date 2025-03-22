@@ -29,7 +29,7 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FlutterLogin(
-      title: "CoRider",
+      title: "RideShare",
       userType: LoginUserType.email,
       savedEmail: "user@user.com", // TODO: Remove this line
       savedPassword: "123456", // TODO: Remove this line

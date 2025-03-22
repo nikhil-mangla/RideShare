@@ -23,7 +23,7 @@ import 'package:path_provider/path_provider.dart';
 class ChatScreen extends StatefulWidget {
   final UserState userState;
   final types.Room room;
-  const ChatScreen({Key? key, required this.userState, required this.room}) : super(key: key);
+  const ChatScreen({super.key, required this.userState, required this.room});
   @override
   State<ChatScreen> createState() => _ChatScreenState();
 }
