@@ -340,11 +340,7 @@ class ProfileScreen extends StatelessWidget {
                                 'Email',
                                 currentUser?.email ?? 'Unknown',
                               ),
-                              _buildInfoRow(
-                                Icons.business,
-                                'Company',
-                                currentUser?.companyName ?? 'Unknown Company',
-                              ),
+                              
                               _buildInfoRow(
                                 Icons.calendar_today,
                                 'Joined',
