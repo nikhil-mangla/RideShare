@@ -3,6 +3,7 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
@@ -41,30 +42,30 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBzs0zB1PSt_srloEajISXRc5uvxqcUA10',
-    appId: '1:72996944730:web:a4b0803b765a328f499163',
-    messagingSenderId: '72996944730',
-    projectId: 'rideshare-b3eea',
-    authDomain: 'rideshare-b3eea.firebaseapp.com',
-    storageBucket: 'rideshare-b3eea.appspot.com',
-    measurementId: 'G-NZ2VR64G1B',
+  static FirebaseOptions get web => FirebaseOptions(
+    apiKey: dotenv.env['FIREBASE_API_KEY'] ?? '',
+    appId: dotenv.env['FIREBASE_APP_ID'] ?? '',
+    messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID'] ?? '',
+    projectId: dotenv.env['FIREBASE_PROJECT_ID'] ?? '',
+    authDomain: dotenv.env['FIREBASE_AUTH_DOMAIN'] ?? '',
+    storageBucket: dotenv.env['FIREBASE_STORAGE_BUCKET'] ?? '',
+    measurementId: dotenv.env['FIREBASE_MEASUREMENT_ID'] ?? '',
   );
 
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBzs0zB1PSt_srloEajISXRc5uvxqcUA10',
-    appId: '1:72996944730:android:8adc4dcdf9735500499163',
-    messagingSenderId: '72996944730',
-    projectId: 'rideshare-b3eea',
-    storageBucket: 'rideshare-b3eea.appspot.com',
+  static FirebaseOptions get android => FirebaseOptions(
+    apiKey: dotenv.env['FIREBASE_API_KEY'] ?? '',
+    appId: dotenv.env['FIREBASE_ANDROID_APP_ID'] ?? '',
+    messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID'] ?? '',
+    projectId: dotenv.env['FIREBASE_PROJECT_ID'] ?? '',
+    storageBucket: dotenv.env['FIREBASE_STORAGE_BUCKET'] ?? '',
   );
 
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBzs0zB1PSt_srloEajISXRc5uvxqcUA10',
-    appId: '1:72996944730:ios:e5ab0d880ed7d4dc499163',
-    messagingSenderId: '72996944730',
-    projectId: 'rideshare-b3eea',
-    storageBucket: 'rideshare-b3eea.appspot.com',
-    iosBundleId: 'com.example.RideShare',
+  static FirebaseOptions get ios => FirebaseOptions(
+    apiKey: dotenv.env['FIREBASE_API_KEY'] ?? '',
+    appId: dotenv.env['FIREBASE_IOS_APP_ID'] ?? '',
+    messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID'] ?? '',
+    projectId: dotenv.env['FIREBASE_PROJECT_ID'] ?? '',
+    storageBucket: dotenv.env['FIREBASE_STORAGE_BUCKET'] ?? '',
+    iosBundleId: dotenv.env['FIREBASE_IOS_BUNDLE_ID'] ?? '',
   );
 }

@@ -4,7 +4,6 @@ import 'package:corider/providers/user_state.dart';
 import 'package:corider/screens/ride/createRideOffer/create_ride_offer_screen.dart';
 import 'package:corider/screens/ride/exploreRides/ride_offer_detail_screen.dart';
 import 'package:corider/screens/ride/exploreRides/rides_filter/filter_sort_enum.dart';
-import 'package:corider/screens/ride/exploreRides/rides_filter/rides_filter.dart';
 import 'package:flutter/material.dart';
 import 'package:corider/widgets/ride_offer_card.dart';
 import 'package:geolocator/geolocator.dart';
@@ -249,8 +248,8 @@ class _ExploreRidesScreenState extends State<ExploreRidesScreen> with TickerProv
       floatingActionButton: FloatingActionButton(
         onPressed: () => refreshOffersIndicatorKey.currentState!.show(),
         backgroundColor: primaryPurple,
-        child: const Icon(Icons.refresh, color: Colors.white),
         tooltip: 'Refresh Rides',
+        child: const Icon(Icons.refresh, color: Colors.white),
       ),
     );
   }

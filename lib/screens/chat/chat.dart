@@ -1,24 +1,23 @@
 import 'dart:async';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:corider/providers/user_state.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_types/flutter_chat_types.dart';
-import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_parsed_text/flutter_parsed_text.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:io';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ChatScreen extends StatefulWidget {
   final UserState userState;
@@ -32,7 +31,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Timer? _timer;
   Stream<QuerySnapshot>? _messagesStream;
   late List<types.Message> _messages;
-  late User _user;
+  late types.User _user;
 
   @override
   void initState() {
@@ -52,25 +51,21 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
-    // Cancel the timer when the widget is disposed
     _cancelTimer();
     super.dispose();
   }
 
   void _startTimer() {
-    // Schedule the function to be called every second
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       widget.userState.setStoredChatRoom(widget.room.id, widget.room.copyWith(lastMessages: _messages));
     });
   }
 
   void _cancelTimer() {
-    // Cancel the timer if it's active
     _timer?.cancel();
   }
 
   Future<void> _sendMessage(types.Message message) async {
-    // handle image/file differently
     if (message.type == types.MessageType.text) {
       message = message.copyWith(status: types.Status.sending);
       setState(() {
@@ -87,9 +82,7 @@ class _ChatScreenState extends State<ChatScreen> {
       final messageData = message.toJson();
       await messagesRef.add(messageData).timeout(
         const Duration(seconds: 10),
-        onTimeout: () {
-          throw TimeoutException('Sending message timed out');
-        },
+        onTimeout: () => throw TimeoutException('Sending message timed out'),
       );
       setState(() {
         final index = _messages.indexWhere((m) => m.id == message.id);
@@ -98,12 +91,7 @@ class _ChatScreenState extends State<ChatScreen> {
         }
       });
     } catch (e) {
-      if (e is TimeoutException) {
-        debugPrint('Sending message timed out');
-      } else {
-        debugPrint('Error sending message: $e');
-      }
-      // Revert optimistic update
+      debugPrint('Error sending message: $e');
       if (message.type == types.MessageType.text) {
         setState(() {
           final index = _messages.indexWhere((m) => m.id == message.id);
@@ -117,12 +105,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _handleSendPressed(types.PartialText message) {
     final textMessage = types.TextMessage(
-      author: types.User(id: _user.id), // only store user id in database
+      author: types.User(id: _user.id),
       createdAt: DateTime.now().millisecondsSinceEpoch,
       id: const Uuid().v4(),
       text: message.text,
     );
-
     _sendMessage(textMessage);
   }
 
@@ -130,41 +117,68 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.room.name!),
+        title: Text(widget.room.name ?? 'Chat'),
+        actions: [
+          // Voice Call Button
+          IconButton(
+            icon: const Icon(Icons.call),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CallPage(
+                    userId: _user.id,
+                    userName: _user.firstName ?? 'User',
+                    callId: widget.room.id,
+                    isVideoCall: false,
+                  ),
+                ),
+              );
+            },
+            tooltip: 'Voice Call',
+          ),
+          // Video Call Button
+          IconButton(
+            icon: const Icon(Icons.videocam),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CallPage(
+                    userId: _user.id,
+                    userName: _user.firstName ?? 'User',
+                    callId: widget.room.id,
+                    isVideoCall: true,
+                  ),
+                ),
+              );
+            },
+            tooltip: 'Video Call',
+          ),
+        ],
       ),
       body: _messagesStream == null
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
+          ? const Center(child: CircularProgressIndicator())
           : StreamBuilder<QuerySnapshot>(
               stream: _messagesStream,
               builder: (context, snapshot) {
                 if (snapshot.connectionState != ConnectionState.active) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
+                  return const Center(child: CircularProgressIndicator());
                 }
-
                 if (snapshot.hasError) {
-                  return Center(
-                    child: Text('Error: ${snapshot.error}'),
-                  );
+                  return Center(child: Text('Error: ${snapshot.error}'));
                 }
-
-                int existingCreatedAt = _messages.isNotEmpty ? _messages.first.createdAt! : 0;
 
                 final newMessages = snapshot.data?.docs
                     .map((doc) {
                       final messageData = doc.data() as Map<String, dynamic>;
                       types.Message message = types.Message.fromJson(messageData);
-                      if (message.author.id == _user.id) {
-                        message = message.copyWith(status: types.Status.sent);
-                      } else {
-                        message = message.copyWith(status: types.Status.seen);
-                      }
-                      return message;
+                      return message.author.id == _user.id
+                          ? message.copyWith(status: types.Status.sent)
+                          : message.copyWith(status: types.Status.seen);
                     })
-                    .where((message) => message.createdAt! > existingCreatedAt)
+                    .where((message) =>
+                        message.createdAt! > (_messages.isNotEmpty ? _messages.first.createdAt! : 0))
                     .toList();
 
                 _messages.insertAll(0, newMessages ?? []);
@@ -183,6 +197,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   imageMessageBuilder: (imageMessage, {required messageWidth}) => CachedNetworkImage(
                     imageUrl: imageMessage.uri,
                     width: messageWidth * 0.8,
+                    placeholder: (context, url) => const CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => const Icon(Icons.error),
                   ),
                   customBottomWidget: widget.room.type == types.RoomType.channel ? const SizedBox(height: 16) : null,
                   textMessageOptions: TextMessageOptions(matchers: [
@@ -190,10 +206,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       pattern: '```[^`]+```',
                       style: PatternStyle.code.textStyle,
                       renderText: ({required String str, required String pattern}) => {
-                        'display': str.replaceAll(
-                          '```',
-                          '',
-                        ),
+                        'display': str.replaceAll('```', ''),
                       },
                     ),
                   ]),
@@ -204,22 +217,19 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   types.Message _fetchUserByMessage(types.Message message) {
-    // debugPrint('storedUsers ${widget.userState.storedUsers}');
     if (widget.userState.storedUsers.containsKey(message.author.id)) {
       final user = widget.userState.storedUsers[message.author.id];
-      message = message.copyWith(author: user!.toChatUser());
+      return message.copyWith(author: user!.toChatUser());
+    } else if (message.author.id == 'notifications') {
+      return message.copyWith(author: const types.User(id: 'notifications'));
     } else {
-      if (message.author.id == 'notifications') {
-        return message.copyWith(author: const types.User(id: 'notifications'));
-      }
-      // store user for future use
       widget.userState.getStoredUserByEmail(message.author.id);
+      return message;
     }
-    return message;
   }
 
   List<types.Message> _fetchUsersByMessages(List<types.Message> messages) {
-    return messages.map((message) => _fetchUserByMessage(message)).toList();
+    return messages.map(_fetchUserByMessage).toList();
   }
 
   void _handleAttachmentPressed() {
@@ -236,45 +246,30 @@ class _ChatScreenState extends State<ChatScreen> {
                   Navigator.pop(context);
                   _handleImageSelection();
                 },
-                child: const Row(
-                  children: [
-                    Icon(Icons.photo),
-                    SizedBox(width: 8),
-                    Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: Text('Photo'),
-                    ),
-                  ],
-                ),
+                child: const Row(children: [
+                  Icon(Icons.photo),
+                  SizedBox(width: 8),
+                  Text('Photo'),
+                ]),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                   _handleFileSelection();
                 },
-                child: const Row(
-                  children: [
-                    Icon(Icons.attach_file),
-                    SizedBox(width: 8),
-                    Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: Text('File'),
-                    ),
-                  ],
-                ),
+                child: const Row(children: [
+                  Icon(Icons.attach_file),
+                  SizedBox(width: 8),
+                  Text('File'),
+                ]),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Row(
-                  children: [
-                    Icon(Icons.cancel),
-                    SizedBox(width: 8),
-                    Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: Text('Cancel'),
-                    ),
-                  ],
-                ),
+                child: const Row(children: [
+                  Icon(Icons.cancel),
+                  SizedBox(width: 8),
+                  Text('Cancel'),
+                ]),
               ),
             ],
           ),
@@ -284,78 +279,45 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _handleFileSelection() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.any,
+    final result = await FilePicker.platform.pickFiles(type: FileType.any);
+    if (result == null || result.files.single.path == null) return;
+
+    final placeholderMessage = types.FileMessage(
+      author: _user,
+      createdAt: DateTime.now().millisecondsSinceEpoch,
+      id: const Uuid().v4(),
+      mimeType: lookupMimeType(result.files.single.path!),
+      name: result.files.single.name,
+      size: result.files.single.size,
+      uri: result.files.single.path!,
+      status: types.Status.sending,
     );
+    setState(() => _messages.insert(0, placeholderMessage));
 
-    if (result != null && result.files.single.path != null) {
-      final placeholderMessage = types.FileMessage(
-        author: _user,
-        createdAt: DateTime.now().millisecondsSinceEpoch,
-        id: const Uuid().v4(),
-        mimeType: lookupMimeType(result.files.single.path!),
-        name: result.files.single.name,
-        size: result.files.single.size,
-        uri: result.files.single.path!,
-        status: types.Status.sending,
+    try {
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('chat_files')
+          .child(widget.userState.currentUser!.companyName)
+          .child(widget.room.id)
+          .child(_generateUniqueFileName(result.files.single.name));
+
+      final uploadTask = storageRef.putFile(
+        File(result.files.single.path!),
+        SettableMetadata(contentType: lookupMimeType(result.files.single.path!)),
       );
+      final snapshot = await uploadTask.timeout(const Duration(seconds: 120),
+          onTimeout: () => throw TimeoutException('File upload timed out'));
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+
+      final message = placeholderMessage.copyWith(uri: downloadUrl, status: types.Status.sent);
+      _sendMessage(message);
+    } catch (e) {
+      debugPrint('Error sending file: $e');
       setState(() {
-        _messages.insert(0, placeholderMessage);
+        final index = _messages.indexWhere((m) => m.id == placeholderMessage.id);
+        if (index != -1) _messages[index] = placeholderMessage.copyWith(status: types.Status.error);
       });
-
-      try {
-        // upload file to storage
-        Reference storageRef = FirebaseStorage.instance
-            .ref()
-            .child('chat_files')
-            .child(widget.userState.currentUser!.companyName)
-            .child(widget.room.id);
-
-        // handle same file names
-        bool hasDuplicate;
-        try {
-          await storageRef.child(result.files.single.name).getMetadata();
-          hasDuplicate = true;
-        } catch (e) {
-          hasDuplicate = false;
-        }
-        if (hasDuplicate) {
-          final String fileName = result.files.single.name;
-          final String extension = fileName.substring(fileName.lastIndexOf('.'));
-          final String fileNameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.'));
-          final String newFileName = '${fileNameWithoutExtension}_${DateTime.now().millisecondsSinceEpoch}$extension';
-          storageRef = storageRef.child(newFileName);
-        } else {
-          storageRef = storageRef.child(result.files.single.name);
-        }
-
-        final uploadTask = storageRef.putFile(
-          File(result.files.single.path!),
-          SettableMetadata(
-            contentType: lookupMimeType(result.files.single.path!),
-          ),
-        );
-        final snapshot = await uploadTask.whenComplete(() => null).timeout(const Duration(seconds: 120), onTimeout: () {
-          uploadTask.cancel();
-          throw TimeoutException('File upload timed out');
-        });
-        final downloadUrl = await snapshot.ref.getDownloadURL();
-
-        // update message with uploaded file url
-        types.FileMessage message = placeholderMessage.copyWith(uri: downloadUrl) as types.FileMessage;
-
-        _sendMessage(message);
-      } catch (e) {
-        debugPrint('Error sending file: $e');
-        // Revert optimistic update
-        setState(() {
-          final index = _messages.indexWhere((m) => m.id == placeholderMessage.id);
-          if (index != -1) {
-            _messages[index] = placeholderMessage.copyWith(status: types.Status.error);
-          }
-        });
-        return;
-      }
     }
   }
 
@@ -365,110 +327,118 @@ class _ChatScreenState extends State<ChatScreen> {
       maxWidth: 1440,
       source: ImageSource.gallery,
     );
+    if (result == null) return;
 
-    if (result != null) {
-      final bytes = await result.readAsBytes();
-      final image = await decodeImageFromList(bytes);
-      // add placeholder to show image before uploading
-      final placeholderMessage = types.ImageMessage(
-        author: _user,
-        createdAt: DateTime.now().millisecondsSinceEpoch,
-        height: image.height.toDouble(),
-        id: const Uuid().v4(),
-        name: result.name,
-        size: bytes.length,
-        uri: result.path,
-        width: image.width.toDouble(),
-        status: types.Status.sending,
-      );
+    final bytes = await result.readAsBytes();
+    final image = await decodeImageFromList(bytes);
+    final placeholderMessage = types.ImageMessage(
+      author: _user,
+      createdAt: DateTime.now().millisecondsSinceEpoch,
+      height: image.height.toDouble(),
+      id: const Uuid().v4(),
+      name: result.name,
+      size: bytes.length,
+      uri: result.path,
+      width: image.width.toDouble(),
+      status: types.Status.sending,
+    );
+    setState(() => _messages.insert(0, placeholderMessage));
+
+    try {
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('chat_images')
+          .child(widget.userState.currentUser!.companyName)
+          .child(widget.room.id)
+          .child(result.name);
+
+      final uploadTask = storageRef.putData(bytes);
+      final snapshot = await uploadTask.timeout(const Duration(seconds: 120),
+          onTimeout: () => throw TimeoutException('Image upload timed out'));
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+
+      final message = placeholderMessage.copyWith(uri: downloadUrl, status: types.Status.sent);
+      _sendMessage(message);
+    } catch (e) {
+      debugPrint('Error sending image: $e');
       setState(() {
-        _messages.insert(0, placeholderMessage);
+        final index = _messages.indexWhere((m) => m.id == placeholderMessage.id);
+        if (index != -1) _messages[index] = placeholderMessage.copyWith(status: types.Status.error);
       });
-
-      try {
-        // upload image to storage
-        final storageRef = FirebaseStorage.instance
-            .ref()
-            .child('chat_images')
-            .child(widget.userState.currentUser!.companyName)
-            .child(widget.room.id)
-            .child(result.name);
-
-        final uploadTask = storageRef.putData(bytes);
-        final snapshot = await uploadTask.whenComplete(() => null).timeout(const Duration(seconds: 120), onTimeout: () {
-          uploadTask.cancel();
-          throw TimeoutException('Image upload timed out');
-        });
-        final downloadUrl = await snapshot.ref.getDownloadURL();
-
-        // update message with uploaded image url
-        types.ImageMessage message = placeholderMessage.copyWith(uri: downloadUrl) as types.ImageMessage;
-
-        _sendMessage(message);
-      } catch (e) {
-        debugPrint('Error sending image: $e');
-        setState(() {
-          final index = _messages.indexWhere((m) => m.id == placeholderMessage.id);
-          if (index != -1) {
-            _messages[index] = placeholderMessage.copyWith(status: types.Status.error);
-          }
-        });
-        return;
-      }
     }
   }
 
   void _handleMessageTap(BuildContext _, types.Message message) async {
     if (message is types.FileMessage) {
       var localPath = message.uri;
-
       if (message.uri.startsWith('http')) {
         try {
           final index = _messages.indexWhere((element) => element.id == message.id);
-          final updatedMessage = (_messages[index] as types.FileMessage).copyWith(
-            isLoading: true,
-          );
-
-          setState(() {
-            _messages[index] = updatedMessage;
-          });
+          setState(() => _messages[index] = (message).copyWith(isLoading: true));
 
           final documentsDir = (await getApplicationDocumentsDirectory()).path;
           localPath = '$documentsDir/${message.name}';
-
           if (!File(localPath).existsSync()) {
             final request = await http.Client().get(Uri.parse(message.uri));
-            final bytes = request.bodyBytes;
-            final file = File(localPath);
-            await file.writeAsBytes(bytes);
+            await File(localPath).writeAsBytes(request.bodyBytes);
           }
         } finally {
           final index = _messages.indexWhere((element) => element.id == message.id);
-          final updatedMessage = (_messages[index] as types.FileMessage).copyWith(
-            isLoading: null,
-          );
-
-          setState(() {
-            _messages[index] = updatedMessage;
-          });
+          setState(() => _messages[index] = (message).copyWith(isLoading: null));
         }
       }
-
       await OpenFilex.open(localPath);
     }
   }
 
-  void _handlePreviewDataFetched(
-    types.TextMessage message,
-    types.PreviewData previewData,
-  ) {
+  void _handlePreviewDataFetched(types.TextMessage message, types.PreviewData previewData) {
     final index = _messages.indexWhere((element) => element.id == message.id);
-    final updatedMessage = (_messages[index] as types.TextMessage).copyWith(
-      previewData: previewData,
-    );
+    if (index != -1) {
+      setState(() => _messages[index] = message.copyWith(previewData: previewData));
+    }
+  }
 
-    setState(() {
-      _messages[index] = updatedMessage;
-    });
+  String _generateUniqueFileName(String originalName) {
+  final dotIndex = originalName.lastIndexOf('.');
+  final hasExtension = dotIndex != -1;
+  final extension = hasExtension ? originalName.substring(dotIndex) : '';
+  final baseName = hasExtension ? originalName.substring(0, dotIndex) : originalName;
+  return '$baseName${DateTime.now().millisecondsSinceEpoch}_${const Uuid().v4()}$extension';
+}
+}
+
+// ZEGOCLOUD Call Page Widget
+class CallPage extends StatelessWidget {
+  final String userId;
+  final String userName;
+  final String callId;
+  final bool isVideoCall;
+
+  const CallPage({
+    super.key,
+    required this.userId,
+    required this.userName,
+    required this.callId,
+    required this.isVideoCall,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Create the call configuration
+    final callConfig = isVideoCall
+        ? ZegoUIKitPrebuiltCallConfig.oneOnOneVideoCall()
+        : ZegoUIKitPrebuiltCallConfig.oneOnOneVoiceCall();
+
+    // Set the onHangUp callback to navigate back when the call ends
+   
+
+    return ZegoUIKitPrebuiltCall(
+      appID: int.parse(dotenv.env['ZEGO_APP_ID'] ?? '0'), // Load from .env
+      appSign: dotenv.env['ZEGO_APP_SIGN'] ?? '', // Load from .env
+      userID: userId,
+      userName: userName,
+      callID: callId,
+      config: callConfig,
+    );
   }
 }

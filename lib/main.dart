@@ -7,17 +7,36 @@ import 'cloud_functions/firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'package:corider/providers/push_notificaions/local_notification_service.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:zego_uikit/zego_uikit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
+
+  // Set preferred orientation
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
+  // Initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
- 
-  UserState userState = UserState();
 
+  // Initialize ZEGOCLOUD SDK
+  final int appID = int.parse(dotenv.env['ZEGO_APP_ID']!);
+  final String appSign = dotenv.env['ZEGO_APP_SIGN']!;
+  ZegoUIKit().init(
+    appID: appID,
+    appSign: appSign,
+  );
+
+  // Initialize user state
+  UserState userState = UserState();
   await userState.loadData();
+
+  // Set up local notifications
   await LocalNotificationService.setup();
 
   runApp(
@@ -38,7 +57,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     final userState = Provider.of<UserState>(context);
