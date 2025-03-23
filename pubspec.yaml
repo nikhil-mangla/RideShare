@@ -67,6 +67,16 @@ flutter:
     - assets/images/logo.png
     - assets/icon/icon.png
 
+  
+  fonts:
+      - family: Garamond
+        fonts:
+          - asset: fonts/Garamond.ttf
+          - asset: fonts/Garamond-Bold.ttf
+            weight: 700
+          - asset: fonts/Garamond-Italic.ttf
+            style: italic
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

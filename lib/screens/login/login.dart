@@ -28,12 +28,20 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FlutterLogin(
-      title: "RideShare",
+   return FlutterLogin(
+  title: "RideShare",
+  titleTag: "RideShare",
+  theme: LoginTheme(
+    titleStyle: TextStyle(
+      fontFamily: 'Garamond',
+      fontWeight: FontWeight.bold,
+      fontSize: 24.0,
+    ),
+  ),
       userType: LoginUserType.email,
       savedEmail: "", // TODO: Remove this line
       savedPassword: "", // TODO: Remove this line
-      // logo: const AssetImage('assets/images/logo.png'),
+      
       onLogin: (data) async {
         final err = await FirebaseFunctions.authUser(data);
         if (err == null) {
