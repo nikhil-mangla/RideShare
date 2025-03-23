@@ -31,6 +31,15 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
   bool isRequesting = false;
   UserModel? driverUser;
   String? driverLocationAddress;
+  String? destinationLocationAddress;
+  
+  // Updated theme colors to match HomeScreen
+  final Color primaryPurple = const Color(0xFF6200EE);
+  final Color secondaryPurple = const Color(0xFF9C27B0);
+  final Color lightPurple = const Color(0xFFE1BEE7);
+  final Color backgroundColor = Colors.white;
+  final Color textDark = const Color(0xFF212121);
+  final Color textLight = const Color(0xFF757575);
 
   void refreshOffers() {
     if (widget.refreshOffersKey is GlobalKey<RefreshIndicatorState>) {
@@ -50,9 +59,8 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
 
   Future<void> _initializeData() async {
     setState(() => isRequesting = true);
-    
+  
     try {
-      // Debug information to help diagnose issues
       debugPrint("Initializing data for ride offer ID: ${widget.rideOffer.id}");
       debugPrint("Driver ID: ${widget.rideOffer.driverId}");
       debugPrint("Driver location: ${widget.rideOffer.driverLocation}");
@@ -60,11 +68,15 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
       
       // Get driver user info
       driverUser = await widget.userState.getStoredUserByEmail(widget.rideOffer.driverId);
+      debugPrint("Destination location: ${widget.rideOffer.destinationLocation}");
+      debugPrint("Destination name: ${widget.rideOffer.destinationLocationName}");
       
-      // Get address from coordinates
+      // Get addresses from coordinates
       driverLocationAddress = await _getAddressFromLatLng(widget.rideOffer.driverLocation);
+      destinationLocationAddress = await _getAddressFromLatLng(widget.rideOffer.destinationLocation);
       
       debugPrint("Driver address resolved to: $driverLocationAddress");
+      debugPrint("Destination address resolved to: $destinationLocationAddress");
     } catch (e) {
       debugPrint("Error initializing ride offer details: $e");
     } finally {
@@ -117,111 +129,257 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
     const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text('Ride Offer Details'),
+        title: const Text('Ride Details', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [secondaryPurple, primaryPurple],
+            ),
+          ),
+        ),
+        elevation: 0,
       ),
       body: isRequesting
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator(color: primaryPurple))
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Driver Details:',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
-                  ),
-                  const SizedBox(height: 8.0),
-                  Text(
-                    'Driver: ${driverUser?.firstName ?? widget.rideOffer.driverId}',
-                    style: const TextStyle(fontSize: 16.0),
+                  _buildInfoCard(
+                    title: 'Driver',
+                    content: driverUser?.firstName ?? widget.rideOffer.driverId,
+                    icon: Icons.person,
                   ),
                   const SizedBox(height: 16.0),
-                  const Text(
-                    'Ride Offer Details:',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+                  _buildInfoCard(
+                    title: 'Schedule',
+                    content: _buildScheduleContent(),
+                    icon: Icons.schedule,
                   ),
-                  const SizedBox(height: 8.0),
-                  Text(
-                    'Proposed Leave Time: \n${widget.rideOffer.proposedLeaveTime != null ? 
-                      widget.rideOffer.proposedLeaveTime!.format(context) : 'Not specified'}',
-                    style: const TextStyle(fontSize: 16.0),
+                  const SizedBox(height: 16.0),
+                  _buildInfoCard(
+                    title: 'Location',
+                    content: driverLocationAddress ?? 'Location not resolved yet',
+                    icon: Icons.location_on,
                   ),
-                  const SizedBox(height: 8.0),
-                  Text(
-                    'Proposed Back Time: \n${widget.rideOffer.proposedBackTime != null ? 
-                      widget.rideOffer.proposedBackTime!.format(context) : 'Not specified'}',
-                    style: const TextStyle(fontSize: 16.0),
+                  const SizedBox(height: 16.0),
+                  _buildInfoCard(
+                    title: 'Destination',
+                    content: destinationLocationAddress ?? 'Destination not resolved yet',
+                    icon: Icons.flag,
                   ),
-                  const SizedBox(height: 8.0),
-                  Text(
-                    'Availability: \n${widget.rideOffer.proposedWeekdays.map((i) => weekdays[i]).join(', ')}',
-                    style: const TextStyle(fontSize: 16.0),
+                  const SizedBox(height: 16.0),
+                  _buildInfoCard(
+                    title: 'Price',
+                    content: widget.rideOffer.price == 0.0 ? 'Free' : '${widget.rideOffer.price.toStringAsFixed(2)}',
+                    icon: Icons.attach_money,
                   ),
-                  const SizedBox(height: 8.0),
-                  Text(
-                    'Location: \n${driverLocationAddress ?? 'Location not resolved yet'}',
-                    style: const TextStyle(fontSize: 16.0),
-                  ),
-                  const SizedBox(height: 8.0),
-                  Text(
-                    'Coordinates: \n(${widget.rideOffer.driverLocation.latitude}, ${widget.rideOffer.driverLocation.longitude})',
-                    style: const TextStyle(fontSize: 16.0),
-                  ),
-                  const SizedBox(height: 8.0),
-                  Text(
-                    'Price: \n${widget.rideOffer.price == 0.0 ? 'Free' : widget.rideOffer.price}',
-                    style: const TextStyle(fontSize: 16.0),
-                  ),
-                  const SizedBox(height: 8.0),
-                  Text(
-                    'Additional Details: \n${widget.rideOffer.additionalDetails ?? 'No additional details'}',
-                    style: const TextStyle(fontSize: 16.0),
-                  ),
-                  if (widget.rideOffer.driverId == currentUser.email) ...[
+                  if (widget.rideOffer.additionalDetails.isNotEmpty) ...[
                     const SizedBox(height: 16.0),
-                    const Text(
-                      'Requested Users:',
-                      style: TextStyle(fontSize: 16.0),
+                    _buildInfoCard(
+                      title: 'Additional Details',
+                      content: widget.rideOffer.additionalDetails,
+                      icon: Icons.info_outline,
                     ),
-                    const SizedBox(height: 8.0),
-                    ...widget.rideOffer.requestedUserIds.entries.map((entry) {
-                      String userId = entry.key;
-                      RequestedOfferStatus status = entry.value;
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  ],
+                  if (widget.rideOffer.driverId == currentUser.email) ...[
+                    const SizedBox(height: 24.0),
+                    Card(
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(userId.split('@')[0]),
                             Row(
                               children: [
-                                Text(describeEnum(status)),
-                                Utils.requestStatusToIcon(status),
+                                Icon(Icons.people_alt_outlined, color: primaryPurple),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Requested Users',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18.0,
+                                    color: primaryPurple,
+                                  ),
+                                ),
                               ],
                             ),
-                            ElevatedButton(
-                              onPressed: () => _handleAcceptRequest(userId, status),
-                              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                              child: const Icon(Icons.check),
-                            ),
-                            ElevatedButton(
-                              onPressed: () => _handleRejectRequest(userId, status),
-                              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                              child: const Icon(Icons.close),
-                            ),
+                            const SizedBox(height: 16.0),
+                            if (widget.rideOffer.requestedUserIds.isEmpty)
+                              Text('No ride requests yet', style: TextStyle(color: textLight)),
+                            ...widget.rideOffer.requestedUserIds.entries.map((entry) {
+                              String userId = entry.key;
+                              RequestedOfferStatus status = entry.value;
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(8),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      offset: const Offset(0, 1),
+                                      blurRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  children: [
+                                    CircleAvatar(
+                                      backgroundColor: secondaryPurple,
+                                      child: Text(
+                                        userId.split('@')[0][0].toUpperCase(),
+                                        style: const TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            userId.split('@')[0],
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: textDark,
+                                            ),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                describeEnum(status),
+                                                style: TextStyle(
+                                                  color: Utils.requestStatusToColor(status),
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Utils.requestStatusToIcon(status),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Row(
+                                      children: [
+                                        _buildActionButton(
+                                          icon: Icons.check,
+                                          color: Colors.green,
+                                          onPressed: () => _handleAcceptRequest(userId, status),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        _buildActionButton(
+                                          icon: Icons.close,
+                                          color: Colors.red,
+                                          onPressed: () => _handleRejectRequest(userId, status),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }),
                           ],
                         ),
-                      );
-                    }),
+                      ),
+                    ),
                   ],
                   const SizedBox(height: 32.0),
                   Center(
                     child: buildRideOfferActions(context, userState, currentUser),
                   ),
+                  const SizedBox(height: 24.0),
                 ],
               ),
             ),
+    );
+  }
+
+  String _buildScheduleContent() {
+    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    List<String> scheduleParts = [];
+    
+    if (widget.rideOffer.proposedLeaveTime != null) {
+      scheduleParts.add("Departure: ${widget.rideOffer.proposedLeaveTime!.format(context)}");
+    }
+    
+    if (widget.rideOffer.proposedBackTime != null) {
+      scheduleParts.add("Return: ${widget.rideOffer.proposedBackTime!.format(context)}");
+    }
+    
+    scheduleParts.add("Days: ${widget.rideOffer.proposedWeekdays.map((i) => weekdays[i]).join(', ')}");
+    
+    return scheduleParts.join('\n');
+  }
+
+  Widget _buildInfoCard({required String title, required String content, required IconData icon}) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: secondaryPurple),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16.0,
+                    color: secondaryPurple,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8.0),
+            Padding(
+              padding: const EdgeInsets.only(left: 4.0),
+              child: Text(
+                content,
+                style: TextStyle(fontSize: 16.0, color: textDark),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: IconButton(
+        icon: Icon(icon, color: color),
+        onPressed: onPressed,
+        constraints: const BoxConstraints(
+          minHeight: 40,
+          minWidth: 40,
+        ),
+        padding: EdgeInsets.zero,
+      ),
     );
   }
 
@@ -267,7 +425,11 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
 
   void _showSnackBar(String message, Duration duration) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), duration: duration),
+      SnackBar(
+        content: Text(message),
+        duration: duration,
+        backgroundColor: secondaryPurple,
+      ),
     );
   }
 
@@ -282,13 +444,29 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
         Navigator.of(context).pop();
         refreshOffers();
       },
-      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-      child: const Text('Delete Ride'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.red,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        elevation: 3,
+      ),
+      child: const Text(
+        'Delete Ride',
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      ),
     );
   }
 
   Widget chatButton(UserModel currentUser) {
-    return ElevatedButton(
+    return ElevatedButton.icon(
+      icon: const Icon(Icons.chat_bubble_outline),
+      label: const Text(
+        'Chat with Driver',
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      ),
       onPressed: () async {
         if (driverUser == null) {
           _showSnackBar('Driver information not available yet', Duration(seconds: 2));
@@ -313,7 +491,15 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
           _showSnackBar('Chat request failed!', Duration(seconds: 2));
         }
       },
-      child: const Text('Chat'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: secondaryPurple,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        elevation: 3,
+      ),
     );
   }
 
@@ -324,17 +510,43 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
       return Column(
         children: [
           chatButton(currentUser),
-          const SizedBox(height: 8.0),
-          Text(
-            'Ride ${describeEnum(requestedOfferStatus!)}!',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 18.0,
-              color: Utils.requestStatusToColor(requestedOfferStatus),
+          const SizedBox(height: 16.0),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            decoration: BoxDecoration(
+              color: Utils.requestStatusToColor(requestedOfferStatus!).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  offset: const Offset(0, 1),
+                  blurRadius: 2,
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Utils.requestStatusToIcon(requestedOfferStatus),
+                const SizedBox(width: 8),
+                Text(
+                  'Status: ${describeEnum(requestedOfferStatus)}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16.0,
+                    color: Utils.requestStatusToColor(requestedOfferStatus),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8.0),
-          ElevatedButton(
+          const SizedBox(height: 16.0),
+          OutlinedButton.icon(
+            icon: const Icon(Icons.cancel_outlined),
+            label: const Text(
+              'Withdraw Request',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
             onPressed: () async {
               setState(() => isRequesting = true);
               final err = await currentUser.withdrawRequestRide(userState, widget.rideOffer.id);
@@ -342,12 +554,20 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
               
               if (err == null) {
                 _showSnackBar('Ride request withdrawn!', Duration(seconds: 1));
+                Navigator.of(context).pop();
               } else {
                 _showSnackBar('Ride request withdraw failed! $err', Duration(seconds: 2));
               }
               refreshOffers();
             },
-            child: const Text('Withdraw Request'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.red,
+              side: const BorderSide(color: Colors.red),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
           ),
         ],
       );
@@ -357,7 +577,12 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
       children: [
         chatButton(currentUser),
         const SizedBox(height: 16.0),
-        ElevatedButton(
+        ElevatedButton.icon(
+          icon: const Icon(Icons.directions_car),
+          label: const Text(
+            'Request Ride',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
           onPressed: () async {
             setState(() => isRequesting = true);
             final err = await currentUser.requestRide(userState, widget.rideOffer);
@@ -365,12 +590,21 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
             
             if (err == null) {
               _showSnackBar('Ride request sent!', Duration(seconds: 1));
+              Navigator.of(context).pop();
             } else {
               _showSnackBar('Ride request failed! $err', Duration(seconds: 2));
             }
             refreshOffers();
           },
-          child: const Text('Request Ride'),
+          style: ElevatedButton.styleFrom(
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            elevation: 3,
+            backgroundColor: primaryPurple,
+          ),
         ),
       ],
     );

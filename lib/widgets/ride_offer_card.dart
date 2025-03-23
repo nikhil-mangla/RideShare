@@ -14,12 +14,13 @@ class RideOfferCard extends StatefulWidget {
   final LatLng? currentLocation;
   final GlobalKey<RefreshIndicatorState> refreshOffersIndicatorKey;
 
-  const RideOfferCard(
-      {super.key,
-      required this.userState,
-      required this.rideOffer,
-      required this.currentLocation,
-      required this.refreshOffersIndicatorKey});
+  const RideOfferCard({
+    super.key,
+    required this.userState,
+    required this.rideOffer,
+    required this.currentLocation,
+    required this.refreshOffersIndicatorKey,
+  });
 
   @override
   State<RideOfferCard> createState() => _RideOfferCardState();
@@ -50,7 +51,6 @@ class _RideOfferCardState extends State<RideOfferCard> {
   @override
   void initState() {
     super.initState();
-    // print(widget.currentLocation);
     getDriver();
   }
 
@@ -63,15 +63,15 @@ class _RideOfferCardState extends State<RideOfferCard> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => UserProfileScreen(
-                            user: driver!,
-                          )),
+                    builder: (context) => UserProfileScreen(user: driver!),
+                  ),
                 );
               },
               child: CircleAvatar(
                 maxRadius: 25,
-                backgroundColor:
-                    driver!.profileImage == null ? Utils.getUserAvatarNameColor(widget.rideOffer.driverId) : null,
+                backgroundColor: driver!.profileImage == null
+                    ? Utils.getUserAvatarNameColor(widget.rideOffer.driverId)
+                    : null,
                 child: driver!.profileImage == null
                     ? Text(
                         driver!.firstName.isNotEmpty && driver!.lastName.isNotEmpty
@@ -89,7 +89,8 @@ class _RideOfferCardState extends State<RideOfferCard> {
                           errorWidget: (context, url, error) => const Icon(Icons.error),
                         ),
                       ),
-              )),
+              ),
+            ),
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -102,8 +103,10 @@ class _RideOfferCardState extends State<RideOfferCard> {
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           if (widget.currentLocation != null)
-            Text(Utils.getDistanceByTwoLocation(widget.currentLocation!, widget.rideOffer.driverLocation),
-                style: const TextStyle(color: Colors.grey))
+            Text(
+              Utils.getDistanceByTwoLocation(widget.currentLocation!, widget.rideOffer.driverLocation),
+              style: const TextStyle(color: Colors.grey),
+            ),
         ],
       ),
       subtitle: Column(
@@ -112,42 +115,56 @@ class _RideOfferCardState extends State<RideOfferCard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.flight_takeoff,
-                    size: 16.0,
-                  ),
-                  const SizedBox(width: 4.0),
-                  Text(
-                    widget.rideOffer.proposedLeaveTime != null 
-                        ? widget.rideOffer.proposedLeaveTime!.format(context)
-                        : 'N/A',
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(width: 8.0),
-                  const Icon(
-                    Icons.flight_land,
-                    size: 16.0,
-                  ),
-                  const SizedBox(width: 4.0),
-                  Text(
-                    widget.rideOffer.proposedBackTime != null 
-                        ? widget.rideOffer.proposedBackTime!.format(context)
-                        : 'N/A',
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                ],
+              Flexible(
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.flight_takeoff,
+                      size: 16.0,
+                    ),
+                    const SizedBox(width: 4.0),
+                    Flexible(
+                      child: Text(
+                        widget.rideOffer.proposedLeaveTime != null
+                            ? widget.rideOffer.proposedLeaveTime!.format(context)
+                            : 'N/A',
+                        style: const TextStyle(fontWeight: FontWeight.w500),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 8.0),
+                    const Icon(
+                      Icons.flight_land,
+                      size: 16.0,
+                    ),
+                    const SizedBox(width: 4.0),
+                    Flexible(
+                      child: Text(
+                        widget.rideOffer.proposedBackTime != null
+                            ? widget.rideOffer.proposedBackTime!.format(context)
+                            : 'N/A',
+                        style: const TextStyle(fontWeight: FontWeight.w500),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              Text(
-                widget.rideOffer.price == 0.0 ? 'Free' : '\$${widget.rideOffer.price}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Text(
+                  widget.rideOffer.price == 0.0 ? 'Free' : '${widget.rideOffer.price}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),
           const SizedBox(height: 8.0),
-          Row(
-            children: _buildProposedWeekdays(context),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: _buildProposedWeekdays(context),
+            ),
           ),
         ],
       ),
@@ -170,8 +187,8 @@ class _RideOfferCardState extends State<RideOfferCard> {
           ),
         },
         myLocationEnabled: true,
-        myLocationButtonEnabled: false, // Disable the "Locate Me" button
-        mapToolbarEnabled: false, // Disable the map toolbar
+        myLocationButtonEnabled: false,
+        mapToolbarEnabled: false,
       ),
     );
   }
@@ -208,46 +225,46 @@ class _RideOfferCardState extends State<RideOfferCard> {
 
   @override
   Widget build(BuildContext context) {
-    // Debug information to track ride offer details
     debugPrint("Building RideOfferCard for offer ID: ${widget.rideOffer.id}");
     debugPrint("Driver location name: ${widget.rideOffer.driverLocationName}");
     
     return GestureDetector(
-        onTap: () {
-          // Navigate to ride offer details page
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => RideOfferDetailScreen(
-                      userState: widget.userState,
-                      rideOffer: widget.rideOffer,
-                      refreshOffersKey: widget.refreshOffersIndicatorKey,
-                    )),
-          );
-        },
-        child: Card(
-          elevation: 2.0,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildListView(),
-              _buildMapView(widget.rideOffer.driverLocation),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Driver Location:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8.0),
-                    Text(widget.rideOffer.driverLocationName ?? 'Location not provided'),
-                  ],
-                ),
-              ),
-            ],
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RideOfferDetailScreen(
+              userState: widget.userState,
+              rideOffer: widget.rideOffer,
+              refreshOffersKey: widget.refreshOffersIndicatorKey,
+            ),
           ),
-        ));
+        );
+      },
+      child: Card(
+        elevation: 2.0,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildListView(),
+            _buildMapView(widget.rideOffer.driverLocation),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Driver Location:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8.0),
+                  Text(widget.rideOffer.driverLocationName ?? 'Location not provided'),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

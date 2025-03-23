@@ -17,21 +17,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final List<Widget> _pages = [
     const OnboardingPage(
       backgroundColor: Colors.lightBlue,
-      title: 'Welcome to CoRider',
+      title: 'Welcome to RideShare',
       description:
-          'Welcome to CoRider, your company-wide carpooling solution. With CoRider carpooling, you can contribute to a greener environment while enjoying a more efficient and enjoyable commute. Join us in reducing traffic congestion and promoting sustainable transportation options for our workplace community.',
+          'Welcome to RideShare, your company-wide carpooling solution. With CoRider carpooling, you can contribute to a greener environment while enjoying a more efficient and enjoyable commute. Join us in reducing traffic congestion and promoting sustainable transportation options for our workplace community.',
     ),
     const OnboardingPage(
       backgroundColor: Colors.lightBlue,
       title: 'Find a Ride',
       description:
-          "With CoRider, finding a ride is a breeze. Browse through available rides shared by your colleagues and select the one that fits your schedule and route. Say goodbye to the hassle of driving alone and join fellow employees for a comfortable and cost-effective commute. Let's make carpooling a part of our daily routine.",
+          "With RideShare, finding a ride is a breeze. Browse through available rides shared by your colleagues and select the one that fits your schedule and route. Say goodbye to the hassle of driving alone and join fellow employees for a comfortable and cost-effective commute. Let's make carpooling a part of our daily routine.",
     ),
     const OnboardingPage(
       backgroundColor: Colors.lightBlue,
       title: 'Offer a Ride',
       description:
-          "Share the ride, share the benefits. By offering a ride on CoRider, you can help your colleagues reach their destinations conveniently while reducing their carbon footprint. Offer your available seats, set your preferred route, and connect with coworkers who are heading in the same direction. Together, let's make our commutes more efficient, social, and eco-friendly.",
+          "Share the ride, share the benefits. By offering a ride on RideShare, you can help your colleagues reach their destinations conveniently while reducing their carbon footprint. Offer your available seats, set your preferred route, and connect with coworkers who are heading in the same direction. Together, let's make our commutes more efficient, social, and eco-friendly.",
     ),
   ];
 

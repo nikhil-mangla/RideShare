@@ -13,6 +13,8 @@ class RideOfferModel {
   List<int> proposedWeekdays;
   String driverLocationName;
   LatLng driverLocation;
+  final LatLng destinationLocation;
+  final String? destinationLocationName;
   double price;
   String additionalDetails;
   final DateTime? createdAt;
@@ -28,6 +30,8 @@ class RideOfferModel {
     required this.proposedWeekdays,
     required this.driverLocationName,
     required this.driverLocation,
+    required this.destinationLocation,
+    this.destinationLocationName,
     required this.price,
     required this.additionalDetails,
   }) : id = id ?? const Uuid().v4();
@@ -36,18 +40,27 @@ class RideOfferModel {
         'id': id,
         'driverId': driverId,
         'vehicleId': vehicleId,
-        'proposedLeaveTime': '${proposedLeaveTime?.hour.toString()}:${proposedLeaveTime?.minute.toString()}',
+        'proposedLeaveTime': proposedLeaveTime != null
+            ? '${proposedLeaveTime!.hour}:${proposedLeaveTime!.minute}'
+            : null,
         'requestedUserIds': requestedUserIds.map((key, value) => MapEntry(key, value.index)),
-        'proposedBackTime': '${proposedBackTime?.hour.toString()}:${proposedBackTime?.minute.toString()}',
+        'proposedBackTime': proposedBackTime != null
+            ? '${proposedBackTime!.hour}:${proposedBackTime!.minute}'
+            : null,
         'proposedWeekdays': proposedWeekdays,
         'driverLocationName': driverLocationName,
         'driverLocation': {
           'latitude': driverLocation.latitude,
           'longitude': driverLocation.longitude,
         },
+        'destinationLocation': {
+          'latitude': destinationLocation.latitude,
+          'longitude': destinationLocation.longitude,
+        },
+        'destinationLocationName': destinationLocationName,
         'price': price,
         'additionalDetails': additionalDetails,
-        'createdAt': createdAt!.toIso8601String(),
+        'createdAt': createdAt?.toIso8601String(),
       };
 
   factory RideOfferModel.generateUnknown() {
@@ -61,41 +74,55 @@ class RideOfferModel {
       proposedWeekdays: [],
       driverLocationName: '',
       driverLocation: const LatLng(0, 0),
+      destinationLocation: const LatLng(0, 0),
       price: 0,
       additionalDetails: '',
     );
   }
 
   factory RideOfferModel.fromJson(Map<String, dynamic> json) {
+    // Helper function to parse LatLng with defaults
+    LatLng parseLatLng(Map<String, dynamic>? locationData, {double defaultLat = 0.0, double defaultLng = 0.0}) {
+      if (locationData == null) {
+        return LatLng(defaultLat, defaultLng);
+      }
+      return LatLng(
+        (locationData['latitude'] as num?)?.toDouble() ?? defaultLat,
+        (locationData['longitude'] as num?)?.toDouble() ?? defaultLng,
+      );
+    }
+
     return RideOfferModel(
-      id: json['id'],
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
-      driverId: json['driverId'],
-      vehicleId: json['vehicleId'],
+      id: json['id'] as String? ?? const Uuid().v4(),
+      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt'] as String) : null,
+      driverId: json['driverId'] as String? ?? '',
+      vehicleId: json['vehicleId'] as String? ?? '',
       proposedLeaveTime: json['proposedLeaveTime'] != null
           ? TimeOfDay(
-              hour: int.parse(json['proposedLeaveTime'].split(':')[0]),
-              minute: int.parse(json['proposedLeaveTime'].split(':')[1]),
+              hour: int.tryParse((json['proposedLeaveTime'] as String).split(':')[0]) ?? 0,
+              minute: int.tryParse((json['proposedLeaveTime'] as String).split(':')[1]) ?? 0,
             )
           : null,
       proposedBackTime: json['proposedBackTime'] != null
           ? TimeOfDay(
-              hour: int.parse(json['proposedBackTime'].split(':')[0]),
-              minute: int.parse(json['proposedBackTime'].split(':')[1]),
+              hour: int.tryParse((json['proposedBackTime'] as String).split(':')[0]) ?? 0,
+              minute: int.tryParse((json['proposedBackTime'] as String).split(':')[1]) ?? 0,
             )
           : null,
       requestedUserIds: json['requestedUserIds'] != null
-          ? (json['requestedUserIds'] as Map<String, dynamic>)
-              .map((key, value) => MapEntry(key, RequestedOfferStatus.values[value]))
+          ? (json['requestedUserIds'] as Map<String, dynamic>).map(
+              (key, value) => MapEntry(key, RequestedOfferStatus.values[value as int]),
+            )
           : {},
-      proposedWeekdays: List<int>.from(json['proposedWeekdays']),
-      driverLocationName: json['driverLocationName'],
-      driverLocation: LatLng(
-        json['driverLocation']['latitude'],
-        json['driverLocation']['longitude'],
-      ),
-      price: json['price'],
-      additionalDetails: json['additionalDetails'],
+      proposedWeekdays: json['proposedWeekdays'] != null
+          ? List<int>.from(json['proposedWeekdays'] as List<dynamic>)
+          : [],
+      driverLocationName: json['driverLocationName'] as String? ?? '',
+      driverLocation: parseLatLng(json['driverLocation'] as Map<String, dynamic>?),
+      destinationLocation: parseLatLng(json['destinationLocation'] as Map<String, dynamic>?),
+      destinationLocationName: json['destinationLocationName'] as String?,
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      additionalDetails: json['additionalDetails'] as String? ?? '',
     );
   }
 }

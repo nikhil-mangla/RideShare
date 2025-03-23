@@ -23,6 +23,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   bool isLoadingOffers = false;
   late TabController _tabController;
   
+  // Color scheme
+  final Color primaryPurple = const Color(0xFF6200EE);
+  final Color secondaryPurple = const Color(0xFF9C27B0);
+  final Color lightPurple = const Color(0xFFE1BEE7);
+  final Color background = Colors.white;
+  final Color textDark = const Color(0xFF212121);
+  final Color textLight = const Color(0xFF757575);
+  
   Future<void> fetchAllOffers() async {
     setState(() {
       isLoadingOffers = true;
@@ -48,21 +56,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   
   @override
   Widget build(BuildContext context) {
-    // Theme colors
-    final primary = Color(0xFF6200EE);
-    final secondary = Color(0xFF9C27B0);
-    final accent = Color(0xFFE1BEE7);
-    final background = Colors.white;
-    final textDark = Color(0xFF212121);
-    final textLight = Color(0xFF757575);
-    
     return Scaffold(
       backgroundColor: background,
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
-              expandedHeight: 140.0,
+              expandedHeight: 160.0,
               floating: true,
               pinned: true,
               elevation: 0,
@@ -73,30 +73,42 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [secondary, primary],
+                      colors: [secondaryPurple, primaryPurple],
                     ),
                   ),
                   child: SafeArea(
                     child: Padding(
-                      padding: EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(20.0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Welcome to RideShare',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.directions_car_rounded,
+                                color: Colors.white,
+                                size: 32,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'RideShare',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 12),
                           Text(
                             'Find & share rides easily',
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.9),
                               fontSize: 16,
+                              letterSpacing: 0.3,
                             ),
                           ),
                         ],
@@ -109,21 +121,28 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 Stack(
                   alignment: Alignment.center,
                   children: [
-                    IconButton(
-                      icon: Icon(Icons.chat_bubble_rounded, color: Colors.white),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ChatListScreen(userState: widget.userState),
-                          ),
-                        );
-                      },
+                    Container(
+                      margin: const EdgeInsets.only(right: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white24,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.chat_bubble_rounded, color: Colors.white),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ChatListScreen(userState: widget.userState),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                     if (widget.userState.totalNotificationsCount != 0)
                       Positioned(
                         top: 7,
-                        right: widget.userState.totalNotificationsCount > 9 ? 0 : 5,
+                        right: widget.userState.totalNotificationsCount > 9 ? 8 : 13,
                         child: NotificationBadge(
                           totalNotifications: widget.userState.totalNotificationsCount,
                           forTotal: true,
@@ -131,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       ),
                   ],
                 ),
-                // Profile icon removed as requested
+                const SizedBox(width: 8),
               ],
             ),
             SliverPersistentHeader(
@@ -139,13 +158,24 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               delegate: _SliverAppBarDelegate(
                 TabBar(
                   controller: _tabController,
-                  labelColor: primary,
+                  labelColor: primaryPurple,
                   unselectedLabelColor: textLight,
-                  indicatorColor: primary,
+                  labelStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    letterSpacing: 0.5,
+                  ),
+                  unselectedLabelStyle: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                  ),
+                  indicatorColor: primaryPurple,
                   indicatorWeight: 3,
+                  indicatorSize: TabBarIndicatorSize.label,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   tabs: [
-                    Tab(text: 'UPCOMING RIDES'),
-                    Tab(text: 'MY OFFERS'),
+                    const Tab(text: 'UPCOMING RIDES'),
+                    const Tab(text: 'MY OFFERS'),
                   ],
                 ),
               ),
@@ -155,40 +185,66 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         body: isLoadingOffers
             ? Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(primary),
+                  valueColor: AlwaysStoppedAnimation<Color>(primaryPurple),
                 ),
               )
-            : TabBarView(
-                controller: _tabController,
-                children: [
-                  // Upcoming Rides Tab
-                  RefreshIndicator(
-                    color: primary,
-                    onRefresh: fetchAllOffers,
-                    child: UpcomingRides(
-                      userState: widget.userState,
-                      fetchAllOffers: fetchAllOffers,
-                      changePageIndex: widget.changePageIndex,
+            : Container(
+                color: Colors.grey[50],
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    // Upcoming Rides Tab
+                    _buildTabContent(
+                      RefreshIndicator(
+                        color: primaryPurple,
+                        onRefresh: fetchAllOffers,
+                        child: UpcomingRides(
+                          userState: widget.userState,
+                          fetchAllOffers: fetchAllOffers,
+                          changePageIndex: widget.changePageIndex,
+                        ),
+                      ),
                     ),
-                  ),
-                  // My Offers Tab
-                  RefreshIndicator(
-                    color: primary,
-                    onRefresh: fetchAllOffers,
-                    child: MyOffers(
-                      userState: widget.userState,
-                      fetchAllOffers: fetchAllOffers,
+                    // My Offers Tab
+                    _buildTabContent(
+                      RefreshIndicator(
+                        color: primaryPurple,
+                        onRefresh: fetchAllOffers,
+                        child: MyOffers(
+                          userState: widget.userState,
+                          fetchAllOffers: fetchAllOffers,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
       ),
-     
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Navigate to create offer screen
+          widget.changePageIndex(1); // Assuming 1 is the index for the create offer page
+        },
+        backgroundColor: primaryPurple,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+  
+  Widget _buildTabContent(Widget child) {
+    return Container(
+      padding: const EdgeInsets.only(top: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+      ),
+      child: child,
     );
   }
 }
 
-// Persistent Header Delegate for TabBar
+// Enhanced Persistent Header Delegate for TabBar
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   _SliverAppBarDelegate(this._tabBar);
 
@@ -206,7 +262,16 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     bool overlapsContent,
   ) {
     return Container(
-      color: Colors.white,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            offset: const Offset(0, 1),
+            blurRadius: 4,
+          ),
+        ],
+      ),
       child: _tabBar,
     );
   }
