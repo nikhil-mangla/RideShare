@@ -28,106 +28,123 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-   return FlutterLogin(
-  title: "RideShare",
-  titleTag: "RideShare",
-  theme: LoginTheme(
-    titleStyle: TextStyle(
-      fontFamily: 'Garamond',
-      fontWeight: FontWeight.bold,
-      fontSize: 24.0,
-    ),
-  ),
-      userType: LoginUserType.email,
-      savedEmail: "", // TODO: Remove this line
-      savedPassword: "", // TODO: Remove this line
-      
-      onLogin: (data) async {
-        final err = await FirebaseFunctions.authUser(data);
-        if (err == null) {
-          return await _handleLogin(context, data.name);
-        } else {
-          // Handle the error returned from _authUser
-          return err;
-        }
-      },
-      onSignup: (data) async {
-        final err = await FirebaseFunctions.signupUser(data);
-        if (err == null) {
-          return await _handleLogin(context, data.name!);
-        } else {
-          // Handle the error returned from _authUser
-          return err;
-        }
-      },
-      onSubmitAnimationCompleted: () {
-        if (isFirstTimeLoad) {
-          isFirstTimeLoad = false;
-          Navigator.of(context).pushAndRemoveUntil(
-              FadePageRoute(
-                builder: (context) => OnboardingScreen(
-                  userState: userState,
+    return GestureDetector(
+      // Close keyboard when tapping outside
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        // Add a Scaffold with safe area handling
+        body: SafeArea(
+          // Use SafeArea to handle notches and system UI
+          minimum: const EdgeInsets.all(0),
+          child: FlutterLogin(
+            title: "RideShare",
+            titleTag: "RideShare",
+            theme: LoginTheme(
+              titleStyle: const TextStyle(
+                fontFamily: 'Garamond',
+                fontWeight: FontWeight.bold,
+                fontSize: 24.0,
+              ),
+              primaryColor: const Color(0xFF6A4C93),
+              accentColor: const Color(0xFF8A70B8), 
+              // Key fix for half screen issue - use proper page colors
+              pageColorLight: const Color(0xFF6A4C93),
+              pageColorDark: const Color(0xFF4A2C73),
+              buttonTheme: LoginButtonTheme(
+                backgroundColor: const Color(0xFF6A4C93),
+                elevation: 4,
+              ),
+              cardTheme: CardTheme(
+                color: Colors.white,
+                elevation: 5,
+                margin: const EdgeInsets.only(top: 15, bottom: 15),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
                 ),
               ),
-              (route) => false);
-        } else {
-          Navigator.of(context).pushAndRemoveUntil(
-              FadePageRoute(
-                builder: (context) => RootNavigationView(
-                  userState: userState,
+              inputTheme: InputDecorationTheme(
+                filled: true,
+                fillColor: Colors.grey.shade100,
+                contentPadding: const EdgeInsets.all(16.0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: BorderSide.none,
                 ),
               ),
-              (route) => false);
-        }
-      },
-      userValidator: (value) => null,
-      passwordValidator: (value) => null,
-      onRecoverPassword: FirebaseFunctions.recoverPassword,
-      messages: LoginMessages(
-        userHint: 'Email',
+            ),
+            userType: LoginUserType.email,
+            onLogin: (data) async {
+              final err = await FirebaseFunctions.authUser(data);
+              if (err == null) {
+                return await _handleLogin(context, data.name);
+              } else {
+                return err;
+              }
+            },
+            onSignup: (data) async {
+              final err = await FirebaseFunctions.signupUser(data);
+              if (err == null) {
+                return await _handleLogin(context, data.name!);
+              } else {
+                return err;
+              }
+            },
+            onSubmitAnimationCompleted: () {
+              // Fix for black screen - add a small delay before navigation
+              Future.delayed(const Duration(milliseconds: 300), () {
+                if (isFirstTimeLoad) {
+                  isFirstTimeLoad = false;
+                  Navigator.of(context).pushReplacement(
+                    FadePageRoute(
+                      builder: (context) => OnboardingScreen(
+                        userState: userState,
+                      ),
+                    ),
+                  );
+                } else {
+                  Navigator.of(context).pushReplacement(
+                    FadePageRoute(
+                      builder: (context) => RootNavigationView(
+                        userState: userState,
+                      ),
+                    ),
+                  );
+                }
+              });
+            },
+            userValidator: (value) =>
+                value == null || value.isEmpty ? 'Email is required' : null,
+            passwordValidator: (value) =>
+                value == null || value.isEmpty ? 'Password is required' : null,
+            onRecoverPassword: FirebaseFunctions.recoverPassword,
+            messages: LoginMessages(
+              userHint: 'Email',
+              passwordHint: 'Password',
+              confirmPasswordHint: 'Confirm Password',
+              loginButton: 'LOG IN',
+              signupButton: 'SIGN UP',
+              forgotPasswordButton: 'Forgot Password?',
+              recoverPasswordButton: 'RESET',
+              goBackButton: 'BACK',
+            ),
+            loginAfterSignUp: true,
+            additionalSignupFields: [
+              UserFormField(
+                  keyName: "firstName",
+                  displayName: "First Name",
+                  icon: const Icon(Icons.person),
+                  fieldValidator: (value) =>
+                      value!.isEmpty ? 'First Name is required' : null),
+              UserFormField(
+                  keyName: "lastName",
+                  displayName: "Last Name",
+                  icon: const Icon(Icons.person_outline),
+                  fieldValidator: (value) =>
+                      value!.isEmpty ? 'Last Name is required' : null),
+            ],
+          ),
+        ),
       ),
-      // onConfirmSignup: (String key, LoginData loginData) async {
-      //   bool isEmailVerified = false;
-      //   try {
-      //     await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      //       email: loginData.name,
-      //       password: loginData.password,
-      //     );
-
-      //     // Send verification email
-      //     await FirebaseAuth.instance.currentUser?.sendEmailVerification();
-
-      //     // Wait for user to verify email
-      //     await FirebaseAuth.instance.currentUser?.reload();
-      //     isEmailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
-      //     if (isEmailVerified) {
-      //       // User signed up successfully
-      //       String successMessage =
-      //           'User ${loginData.name} signed up successfully!';
-      //       debugPrint(successMessage);
-      //     } else {
-      //       // Error occurred while signing up
-      //       return 'Error signing up: Email not verified';
-      //     }
-      //     // Return null to indicate successful signup
-      //     return null;
-      //   } catch (e) {
-      //     // Return the error message to display in the UI
-      //     return 'Error signing up: $e';
-      //   }
-      // },
-      // confirmSignupKeyboardType: TextInputType.number,
-      loginAfterSignUp: true,
-      additionalSignupFields: [
-        UserFormField(
-            keyName: "firstName",
-            displayName: "First Name",
-            fieldValidator: (value) => value!.isEmpty ? 'First Name is required' : null),
-        UserFormField(
-            keyName: "lastName",
-            displayName: "Last Name",
-            fieldValidator: (value) => value!.isEmpty ? 'Last Name is required' : null),
-      ],
     );
   }
 }

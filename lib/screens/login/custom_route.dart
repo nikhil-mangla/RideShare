@@ -8,7 +8,7 @@ class FadePageRoute<T> extends MaterialPageRoute<T> {
   });
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 600);
+  Duration get transitionDuration => const Duration(milliseconds: 400);
 
   @override
   Widget buildTransitions(
@@ -18,12 +18,27 @@ class FadePageRoute<T> extends MaterialPageRoute<T> {
     Widget child,
   ) {
     if (settings.name == LoginScreen.routeName) {
-      return child;
+      return child; // Skip custom transition for LoginScreen
     }
 
-    return FadeTransition(
-      opacity: animation,
-      child: child,
+    // Smooth fade and slide transition for other screens
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: const Offset(0.0, 0.1),
+        end: Offset.zero,
+      ).animate(
+        CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeInOut,
+        ),
+      ),
+      child: FadeTransition(
+        opacity: CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeInOut,
+        ),
+        child: child,
+      ),
     );
   }
 }
