@@ -5,6 +5,7 @@ import 'package:corider/utils/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:corider/models/ride_offer_model.dart';
+import 'package:corider/models/user_model.dart';
 
 class UpcomingRides extends StatefulWidget {
   final UserState userState;
@@ -20,6 +21,7 @@ class UpcomingRides extends StatefulWidget {
 class UpcomingRidesState extends State<UpcomingRides> {
   GlobalKey<RefreshIndicatorState> refreshMyRequestedOfferIndicatorKey = GlobalKey<RefreshIndicatorState>();
   List<RideOfferModel> myRequestedOffers = [];
+  Map<String, UserModel?> drivers = {};
 
   Future<void> fetchMyRequestedOffers() async {
     await widget.fetchAllOffers();
@@ -33,12 +35,49 @@ class UpcomingRidesState extends State<UpcomingRides> {
     setState(() {
       myRequestedOffers = requestedOffers;
     });
+    
+    // Fetch driver information for each offer
+    for (var offer in requestedOffers) {
+      getDriverInfo(offer.driverId);
+    }
+  }
+  
+  Future<void> getDriverInfo(String driverId) async {
+    if (driverId == widget.userState.currentUser!.email) {
+      setState(() {
+        drivers[driverId] = widget.userState.currentUser!;
+      });
+      return;
+    }
+
+    UserModel? fetchedDriver;
+    if (widget.userState.storedUsers.containsKey(driverId)) {
+      fetchedDriver = widget.userState.storedUsers[driverId];
+    } else {
+      fetchedDriver = await widget.userState.getStoredUserByEmail(driverId);
+    }
+    
+    setState(() {
+      drivers[driverId] = fetchedDriver;
+    });
   }
 
   @override
   void initState() {
     super.initState();
     getMyRequestedOffers();
+  }
+
+  String getDriverName(String driverId) {
+    if (driverId == widget.userState.currentUser!.email) {
+      return 'You';
+    }
+    
+    if (drivers.containsKey(driverId) && drivers[driverId] != null) {
+      return drivers[driverId]!.fullName;
+    }
+    
+    return 'Loading...';
   }
 
   @override
@@ -92,25 +131,44 @@ class UpcomingRidesState extends State<UpcomingRides> {
           }
 
           return ListTile(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
+            title: Text(
+              getDriverName(rideOffer.driverId),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(Utils.getShortLocationName(rideOffer.driverLocationName)),
-                Text(' - ${describeEnum(requestedOfferStatus)}',
-                    style: TextStyle(color: Utils.requestStatusToColor(requestedOfferStatus))),
+                Text(
+                  '${rideOffer.proposedLeaveTime!.format(context)} - ${rideOffer.proposedBackTime!.format(context)}',
+                ),
               ],
             ),
-            subtitle: Text(
-                '${rideOffer.proposedLeaveTime!.format(context)} - ${rideOffer.proposedBackTime!.format(context)}'),
-            trailing: Utils.requestStatusToIcon(requestedOfferStatus),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  describeEnum(requestedOfferStatus),
+                  style: TextStyle(
+                    color: Utils.requestStatusToColor(requestedOfferStatus),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Utils.requestStatusToIcon(requestedOfferStatus),
+              ],
+            ),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                    builder: (context) => RideOfferDetailScreen(
-                          userState: widget.userState,
-                          rideOffer: rideOffer,
-                          refreshOffersKey: refreshMyRequestedOfferIndicatorKey,
-                        )),
+                  builder: (context) => RideOfferDetailScreen(
+                    userState: widget.userState,
+                    rideOffer: rideOffer,
+                    refreshOffersKey: refreshMyRequestedOfferIndicatorKey,
+                  ),
+                ),
               );
             },
           );

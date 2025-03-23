@@ -76,7 +76,7 @@ class LoginScreen extends StatelessWidget {
       passwordValidator: (value) => null,
       onRecoverPassword: FirebaseFunctions.recoverPassword,
       messages: LoginMessages(
-        userHint: 'Company Email',
+        userHint: 'Email',
       ),
       // onConfirmSignup: (String key, LoginData loginData) async {
       //   bool isEmailVerified = false;

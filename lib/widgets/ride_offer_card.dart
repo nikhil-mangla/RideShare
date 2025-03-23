@@ -52,6 +52,8 @@ class _RideOfferCardState extends State<RideOfferCard> {
   void initState() {
     super.initState();
     getDriver();
+    // Debug the initial value of destinationLocationName
+    debugPrint("Initial destination location name: ${widget.rideOffer.destinationLocationName}");
   }
 
   Widget _buildListView() {
@@ -118,11 +120,6 @@ class _RideOfferCardState extends State<RideOfferCard> {
               Flexible(
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.flight_takeoff,
-                      size: 16.0,
-                    ),
-                    const SizedBox(width: 4.0),
                     Flexible(
                       child: Text(
                         widget.rideOffer.proposedLeaveTime != null
@@ -133,10 +130,6 @@ class _RideOfferCardState extends State<RideOfferCard> {
                       ),
                     ),
                     const SizedBox(width: 8.0),
-                    const Icon(
-                      Icons.flight_land,
-                      size: 16.0,
-                    ),
                     const SizedBox(width: 4.0),
                     Flexible(
                       child: Text(
@@ -167,28 +160,6 @@ class _RideOfferCardState extends State<RideOfferCard> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildMapView(LatLng driverLocation) {
-    return SizedBox(
-      height: 200.0,
-      child: GoogleMap(
-        initialCameraPosition: CameraPosition(
-          target: driverLocation,
-          zoom: 15.0,
-        ),
-        markers: <Marker>{
-          Marker(
-            markerId: const MarkerId('driverLocationMarker'),
-            position: driverLocation,
-            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-          ),
-        },
-        myLocationEnabled: true,
-        myLocationButtonEnabled: false,
-        mapToolbarEnabled: false,
       ),
     );
   }
@@ -225,9 +196,11 @@ class _RideOfferCardState extends State<RideOfferCard> {
 
   @override
   Widget build(BuildContext context) {
+    // Debug ride offer details during build
     debugPrint("Building RideOfferCard for offer ID: ${widget.rideOffer.id}");
     debugPrint("Driver location name: ${widget.rideOffer.driverLocationName}");
-    
+   
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -247,18 +220,22 @@ class _RideOfferCardState extends State<RideOfferCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildListView(),
-            _buildMapView(widget.rideOffer.driverLocation),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Driver Location:',
+                    'Pickup Location:',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8.0),
-                  Text(widget.rideOffer.driverLocationName ?? 'Location not provided'),
+                  Text(
+                    widget.rideOffer.driverLocationName ?? 'Pickup location not provided',
+                    style: const TextStyle(color: Colors.black87),
+                  ),
+                 
+                 
                 ],
               ),
             ),
