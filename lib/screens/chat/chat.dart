@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:corider/providers/user_state.dart';
+import 'package:rideshare/providers/user_state.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -57,7 +57,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      widget.userState.setStoredChatRoom(widget.room.id, widget.room.copyWith(lastMessages: _messages));
+      widget.userState.setStoredChatRoom(
+          widget.room.id, widget.room.copyWith(lastMessages: _messages));
     });
   }
 
@@ -81,9 +82,10 @@ class _ChatScreenState extends State<ChatScreen> {
           .collection('messages');
       final messageData = message.toJson();
       await messagesRef.add(messageData).timeout(
-        const Duration(seconds: 10),
-        onTimeout: () => throw TimeoutException('Sending message timed out'),
-      );
+            const Duration(seconds: 10),
+            onTimeout: () =>
+                throw TimeoutException('Sending message timed out'),
+          );
       setState(() {
         final index = _messages.indexWhere((m) => m.id == message.id);
         if (index != -1) {
@@ -172,13 +174,15 @@ class _ChatScreenState extends State<ChatScreen> {
                 final newMessages = snapshot.data?.docs
                     .map((doc) {
                       final messageData = doc.data() as Map<String, dynamic>;
-                      types.Message message = types.Message.fromJson(messageData);
+                      types.Message message =
+                          types.Message.fromJson(messageData);
                       return message.author.id == _user.id
                           ? message.copyWith(status: types.Status.sent)
                           : message.copyWith(status: types.Status.seen);
                     })
                     .where((message) =>
-                        message.createdAt! > (_messages.isNotEmpty ? _messages.first.createdAt! : 0))
+                        message.createdAt! >
+                        (_messages.isNotEmpty ? _messages.first.createdAt! : 0))
                     .toList();
 
                 _messages.insertAll(0, newMessages ?? []);
@@ -190,22 +194,30 @@ class _ChatScreenState extends State<ChatScreen> {
                   onMessageTap: _handleMessageTap,
                   onPreviewDataFetched: _handlePreviewDataFetched,
                   onSendPressed: _handleSendPressed,
-                  showUserAvatars: widget.room.type == types.RoomType.channel ? false : true,
+                  showUserAvatars:
+                      widget.room.type == types.RoomType.channel ? false : true,
                   showUserNames: true,
                   timeFormat: DateFormat('h:mm a'),
                   user: _user,
-                  imageMessageBuilder: (imageMessage, {required messageWidth}) => CachedNetworkImage(
+                  imageMessageBuilder: (imageMessage,
+                          {required messageWidth}) =>
+                      CachedNetworkImage(
                     imageUrl: imageMessage.uri,
                     width: messageWidth * 0.8,
-                    placeholder: (context, url) => const CircularProgressIndicator(),
-                    errorWidget: (context, url, error) => const Icon(Icons.error),
+                    placeholder: (context, url) =>
+                        const CircularProgressIndicator(),
+                    errorWidget: (context, url, error) =>
+                        const Icon(Icons.error),
                   ),
-                  customBottomWidget: widget.room.type == types.RoomType.channel ? const SizedBox(height: 16) : null,
+                  customBottomWidget: widget.room.type == types.RoomType.channel
+                      ? const SizedBox(height: 16)
+                      : null,
                   textMessageOptions: TextMessageOptions(matchers: [
                     MatchText(
                       pattern: '```[^`]+```',
                       style: PatternStyle.code.textStyle,
-                      renderText: ({required String str, required String pattern}) => {
+                      renderText:
+                          ({required String str, required String pattern}) => {
                         'display': str.replaceAll('```', ''),
                       },
                     ),
@@ -304,19 +316,24 @@ class _ChatScreenState extends State<ChatScreen> {
 
       final uploadTask = storageRef.putFile(
         File(result.files.single.path!),
-        SettableMetadata(contentType: lookupMimeType(result.files.single.path!)),
+        SettableMetadata(
+            contentType: lookupMimeType(result.files.single.path!)),
       );
       final snapshot = await uploadTask.timeout(const Duration(seconds: 120),
           onTimeout: () => throw TimeoutException('File upload timed out'));
       final downloadUrl = await snapshot.ref.getDownloadURL();
 
-      final message = placeholderMessage.copyWith(uri: downloadUrl, status: types.Status.sent);
+      final message = placeholderMessage.copyWith(
+          uri: downloadUrl, status: types.Status.sent);
       _sendMessage(message);
     } catch (e) {
       debugPrint('Error sending file: $e');
       setState(() {
-        final index = _messages.indexWhere((m) => m.id == placeholderMessage.id);
-        if (index != -1) _messages[index] = placeholderMessage.copyWith(status: types.Status.error);
+        final index =
+            _messages.indexWhere((m) => m.id == placeholderMessage.id);
+        if (index != -1)
+          _messages[index] =
+              placeholderMessage.copyWith(status: types.Status.error);
       });
     }
   }
@@ -357,13 +374,17 @@ class _ChatScreenState extends State<ChatScreen> {
           onTimeout: () => throw TimeoutException('Image upload timed out'));
       final downloadUrl = await snapshot.ref.getDownloadURL();
 
-      final message = placeholderMessage.copyWith(uri: downloadUrl, status: types.Status.sent);
+      final message = placeholderMessage.copyWith(
+          uri: downloadUrl, status: types.Status.sent);
       _sendMessage(message);
     } catch (e) {
       debugPrint('Error sending image: $e');
       setState(() {
-        final index = _messages.indexWhere((m) => m.id == placeholderMessage.id);
-        if (index != -1) _messages[index] = placeholderMessage.copyWith(status: types.Status.error);
+        final index =
+            _messages.indexWhere((m) => m.id == placeholderMessage.id);
+        if (index != -1)
+          _messages[index] =
+              placeholderMessage.copyWith(status: types.Status.error);
       });
     }
   }
@@ -373,8 +394,10 @@ class _ChatScreenState extends State<ChatScreen> {
       var localPath = message.uri;
       if (message.uri.startsWith('http')) {
         try {
-          final index = _messages.indexWhere((element) => element.id == message.id);
-          setState(() => _messages[index] = (message).copyWith(isLoading: true));
+          final index =
+              _messages.indexWhere((element) => element.id == message.id);
+          setState(
+              () => _messages[index] = (message).copyWith(isLoading: true));
 
           final documentsDir = (await getApplicationDocumentsDirectory()).path;
           localPath = '$documentsDir/${message.name}';
@@ -383,28 +406,33 @@ class _ChatScreenState extends State<ChatScreen> {
             await File(localPath).writeAsBytes(request.bodyBytes);
           }
         } finally {
-          final index = _messages.indexWhere((element) => element.id == message.id);
-          setState(() => _messages[index] = (message).copyWith(isLoading: null));
+          final index =
+              _messages.indexWhere((element) => element.id == message.id);
+          setState(
+              () => _messages[index] = (message).copyWith(isLoading: null));
         }
       }
       await OpenFilex.open(localPath);
     }
   }
 
-  void _handlePreviewDataFetched(types.TextMessage message, types.PreviewData previewData) {
+  void _handlePreviewDataFetched(
+      types.TextMessage message, types.PreviewData previewData) {
     final index = _messages.indexWhere((element) => element.id == message.id);
     if (index != -1) {
-      setState(() => _messages[index] = message.copyWith(previewData: previewData));
+      setState(
+          () => _messages[index] = message.copyWith(previewData: previewData));
     }
   }
 
   String _generateUniqueFileName(String originalName) {
-  final dotIndex = originalName.lastIndexOf('.');
-  final hasExtension = dotIndex != -1;
-  final extension = hasExtension ? originalName.substring(dotIndex) : '';
-  final baseName = hasExtension ? originalName.substring(0, dotIndex) : originalName;
-  return '$baseName${DateTime.now().millisecondsSinceEpoch}_${const Uuid().v4()}$extension';
-}
+    final dotIndex = originalName.lastIndexOf('.');
+    final hasExtension = dotIndex != -1;
+    final extension = hasExtension ? originalName.substring(dotIndex) : '';
+    final baseName =
+        hasExtension ? originalName.substring(0, dotIndex) : originalName;
+    return '$baseName${DateTime.now().millisecondsSinceEpoch}_${const Uuid().v4()}$extension';
+  }
 }
 
 // ZEGOCLOUD Call Page Widget
@@ -430,7 +458,6 @@ class CallPage extends StatelessWidget {
         : ZegoUIKitPrebuiltCallConfig.oneOnOneVoiceCall();
 
     // Set the onHangUp callback to navigate back when the call ends
-   
 
     return ZegoUIKitPrebuiltCall(
       appID: int.parse(dotenv.env['ZEGO_APP_ID'] ?? '0'), // Load from .env

@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:corider/providers/push_notificaions/local_notification_service.dart';
-import 'package:corider/providers/user_state.dart';
-import 'package:corider/screens/ride/exploreRides/explore_rides.dart';
-import 'package:corider/screens/home/home.dart';
+import 'package:rideshare/providers/push_notificaions/local_notification_service.dart';
+import 'package:rideshare/providers/user_state.dart';
+import 'package:rideshare/screens/ride/exploreRides/explore_rides.dart';
+import 'package:rideshare/screens/home/home.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'profile/profile_screen.dart';
@@ -35,14 +35,18 @@ class _RootNavigationViewState extends State<RootNavigationView> {
         setState(() {
           isBackgroundFethching = true;
         });
-        final storedChatRooms = Map<String, types.Room>.from(widget.userState.storedChatRooms);
+        final storedChatRooms =
+            Map<String, types.Room>.from(widget.userState.storedChatRooms);
         widget.userState.fetchAllChatRooms().then((allChatRooms) async {
           // compare storedChatRooms and allChatRooms
 
           for (final chatRoom in allChatRooms) {
             // if there is a new chat room, then show notification
             if (!storedChatRooms.containsKey(chatRoom.id)) {
-              final otherUser = chatRoom.users.where((user) => user.id != widget.userState.currentUser!.email).first;
+              final otherUser = chatRoom.users
+                  .where(
+                      (user) => user.id != widget.userState.currentUser!.email)
+                  .first;
               // show notification
               LocalNotificationService.showNewMessageLocalNotification(
                 'New Chat',
@@ -51,15 +55,22 @@ class _RootNavigationViewState extends State<RootNavigationView> {
             } else {
               // if there is a new message, then show notification
               final storedChatRoom = storedChatRooms[chatRoom.id]!;
-              if (storedChatRoom.lastMessages!.length < chatRoom.lastMessages!.length) {
+              if (storedChatRoom.lastMessages!.length <
+                  chatRoom.lastMessages!.length) {
                 final latestMessage = chatRoom.lastMessages!.first;
-                final otherUserId =
-                    chatRoom.users.firstWhereOrNull((user) => user.id != widget.userState.currentUser!.email)?.id;
-                final otherUser = otherUserId != null ? await widget.userState.getStoredUserByEmail(otherUserId) : null;
+                final otherUserId = chatRoom.users
+                    .firstWhereOrNull((user) =>
+                        user.id != widget.userState.currentUser!.email)
+                    ?.id;
+                final otherUser = otherUserId != null
+                    ? await widget.userState.getStoredUserByEmail(otherUserId)
+                    : null;
                 // show notification
                 LocalNotificationService.showNewMessageLocalNotification(
                   otherUser?.fullName ?? 'New Notification',
-                  latestMessage is types.TextMessage ? latestMessage.text : '[Attachment]]',
+                  latestMessage is types.TextMessage
+                      ? latestMessage.text
+                      : '[Attachment]]',
                 );
               }
             }

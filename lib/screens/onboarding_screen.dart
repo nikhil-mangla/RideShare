@@ -1,4 +1,4 @@
-import 'package:corider/providers/user_state.dart';
+import 'package:rideshare/providers/user_state.dart';
 import 'package:flutter/material.dart';
 import 'root.dart';
 
@@ -19,7 +19,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       backgroundColor: Colors.lightBlue,
       title: 'Welcome to RideShare',
       description:
-          'Welcome to RideShare, your company-wide carpooling solution. With CoRider carpooling, you can contribute to a greener environment while enjoying a more efficient and enjoyable commute. Join us in reducing traffic congestion and promoting sustainable transportation options for our workplace community.',
+          'Welcome to RideShare, your company-wide carpooling solution. With rideshare carpooling, you can contribute to a greener environment while enjoying a more efficient and enjoyable commute. Join us in reducing traffic congestion and promoting sustainable transportation options for our workplace community.',
     ),
     const OnboardingPage(
       backgroundColor: Colors.lightBlue,
@@ -79,7 +79,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       )
                     : ElevatedButton(
                         onPressed: () {
-                          Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          Navigator.of(context)
+                              .pushReplacement(MaterialPageRoute(
                             builder: (context) => RootNavigationView(
                               userState: widget.userState,
                             ),
@@ -90,7 +91,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.0),
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20.0, vertical: 12.0),
                         ),
                         child: const Text(
                           'Get Started',

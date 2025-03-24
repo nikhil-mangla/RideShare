@@ -1,4 +1,4 @@
-import 'package:corider/screens/ride/exploreRides/rides_filter/filter_sort_enum.dart';
+import 'package:rideshare/screens/ride/exploreRides/rides_filter/filter_sort_enum.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -35,13 +35,15 @@ class _RidesFilterState extends State<RidesFilter> {
                 setState(() {
                   selectedFilter = value!;
                 });
-                widget.onFilterChanged(RideOfferFilter.values.firstWhere((filter) => describeEnum(filter) == value));
+                widget.onFilterChanged(RideOfferFilter.values
+                    .firstWhere((filter) => describeEnum(filter) == value));
               },
               items: RideOfferFilter.values.map((filter) {
                 return DropdownMenuItem(
                   value: describeEnum(filter),
                   child: Text(
-                    describeEnum(filter)[0].toUpperCase() + describeEnum(filter).substring(1),
+                    describeEnum(filter)[0].toUpperCase() +
+                        describeEnum(filter).substring(1),
                   ),
                 );
               }).toList()),
@@ -52,13 +54,15 @@ class _RidesFilterState extends State<RidesFilter> {
                 setState(() {
                   selectedSort = value!;
                 });
-                widget.onSortChanged(RideOfferSortBy.values.firstWhere((sort) => describeEnum(sort) == value));
+                widget.onSortChanged(RideOfferSortBy.values
+                    .firstWhere((sort) => describeEnum(sort) == value));
               },
               items: RideOfferSortBy.values.map((sort) {
                 return DropdownMenuItem(
                   value: describeEnum(sort),
                   child: Text(
-                    describeEnum(sort)[0].toUpperCase() + describeEnum(sort).substring(1),
+                    describeEnum(sort)[0].toUpperCase() +
+                        describeEnum(sort).substring(1),
                   ),
                 );
               }).toList()),

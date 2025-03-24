@@ -1,12 +1,12 @@
-import 'package:corider/cloud_functions/firebase_function.dart';
-import 'package:corider/models/types/requested_offer_status.dart';
-import 'package:corider/models/user_model.dart';
-import 'package:corider/providers/user_state.dart';
-import 'package:corider/screens/chat/chat.dart';
-import 'package:corider/utils/utils.dart';
+import 'package:rideshare/cloud_functions/firebase_function.dart';
+import 'package:rideshare/models/types/requested_offer_status.dart';
+import 'package:rideshare/models/user_model.dart';
+import 'package:rideshare/providers/user_state.dart';
+import 'package:rideshare/screens/chat/chat.dart';
+import 'package:rideshare/utils/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:corider/models/ride_offer_model.dart';
+import 'package:rideshare/models/ride_offer_model.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
@@ -32,7 +32,7 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
   UserModel? driverUser;
   String? driverLocationAddress;
   String? destinationLocationAddress;
-  
+
   // Updated theme colors to match HomeScreen
   final Color primaryPurple = const Color(0xFF6200EE);
   final Color secondaryPurple = const Color(0xFF9C27B0);
@@ -47,7 +47,8 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
           widget.refreshOffersKey as GlobalKey<RefreshIndicatorState>;
       refreshOffersIndicatorKey.currentState?.show();
     } else {
-      debugPrint('widget.refreshOffersKey is not of type GlobalKey<RefreshIndicatorState>');
+      debugPrint(
+          'widget.refreshOffersKey is not of type GlobalKey<RefreshIndicatorState>');
     }
   }
 
@@ -59,24 +60,31 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
 
   Future<void> _initializeData() async {
     setState(() => isRequesting = true);
-  
+
     try {
       debugPrint("Initializing data for ride offer ID: ${widget.rideOffer.id}");
       debugPrint("Driver ID: ${widget.rideOffer.driverId}");
       debugPrint("Driver location: ${widget.rideOffer.driverLocation}");
-      debugPrint("Driver location name: ${widget.rideOffer.driverLocationName}");
-      
+      debugPrint(
+          "Driver location name: ${widget.rideOffer.driverLocationName}");
+
       // Get driver user info
-      driverUser = await widget.userState.getStoredUserByEmail(widget.rideOffer.driverId);
-      debugPrint("Destination location: ${widget.rideOffer.destinationLocation}");
-      debugPrint("Destination name: ${widget.rideOffer.destinationLocationName}");
-      
+      driverUser = await widget.userState
+          .getStoredUserByEmail(widget.rideOffer.driverId);
+      debugPrint(
+          "Destination location: ${widget.rideOffer.destinationLocation}");
+      debugPrint(
+          "Destination name: ${widget.rideOffer.destinationLocationName}");
+
       // Get addresses from coordinates
-      driverLocationAddress = await _getAddressFromLatLng(widget.rideOffer.driverLocation);
-      destinationLocationAddress = await _getAddressFromLatLng(widget.rideOffer.destinationLocation);
-      
+      driverLocationAddress =
+          await _getAddressFromLatLng(widget.rideOffer.driverLocation);
+      destinationLocationAddress =
+          await _getAddressFromLatLng(widget.rideOffer.destinationLocation);
+
       debugPrint("Driver address resolved to: $driverLocationAddress");
-      debugPrint("Destination address resolved to: $destinationLocationAddress");
+      debugPrint(
+          "Destination address resolved to: $destinationLocationAddress");
     } catch (e) {
       debugPrint("Error initializing ride offer details: $e");
     } finally {
@@ -90,28 +98,28 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
         position.latitude,
         position.longitude,
       );
-      
+
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks[0];
         // Create a more robust address format that handles nulls
         List<String> addressParts = [];
-        
+
         if (place.street != null && place.street!.isNotEmpty) {
           addressParts.add(place.street!);
         }
-        
+
         if (place.locality != null && place.locality!.isNotEmpty) {
           addressParts.add(place.locality!);
         }
-        
+
         if (place.country != null && place.country!.isNotEmpty) {
           addressParts.add(place.country!);
         }
-        
+
         if (addressParts.isEmpty) {
           return widget.rideOffer.driverLocationName ?? 'Unknown Location';
         }
-        
+
         return addressParts.join(', ');
       } else {
         return widget.rideOffer.driverLocationName ?? 'Unknown Location';
@@ -131,7 +139,8 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text('Ride Details', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text('Ride Details',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -164,19 +173,23 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
                   const SizedBox(height: 16.0),
                   _buildInfoCard(
                     title: 'Location',
-                    content: driverLocationAddress ?? 'Location not resolved yet',
+                    content:
+                        driverLocationAddress ?? 'Location not resolved yet',
                     icon: Icons.location_on,
                   ),
                   const SizedBox(height: 16.0),
                   _buildInfoCard(
                     title: 'Destination',
-                    content: destinationLocationAddress ?? 'Destination not resolved yet',
+                    content: destinationLocationAddress ??
+                        'Destination not resolved yet',
                     icon: Icons.flag,
                   ),
                   const SizedBox(height: 16.0),
                   _buildInfoCard(
                     title: 'Price',
-                    content: widget.rideOffer.price == 0.0 ? 'Free' : '${widget.rideOffer.price.toStringAsFixed(2)}',
+                    content: widget.rideOffer.price == 0.0
+                        ? 'Free'
+                        : '${widget.rideOffer.price.toStringAsFixed(2)}',
                     icon: Icons.attach_money,
                   ),
                   if (widget.rideOffer.additionalDetails.isNotEmpty) ...[
@@ -201,7 +214,8 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.people_alt_outlined, color: primaryPurple),
+                                Icon(Icons.people_alt_outlined,
+                                    color: primaryPurple),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Requested Users',
@@ -215,8 +229,10 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
                             ),
                             const SizedBox(height: 16.0),
                             if (widget.rideOffer.requestedUserIds.isEmpty)
-                              Text('No ride requests yet', style: TextStyle(color: textLight)),
-                            ...widget.rideOffer.requestedUserIds.entries.map((entry) {
+                              Text('No ride requests yet',
+                                  style: TextStyle(color: textLight)),
+                            ...widget.rideOffer.requestedUserIds.entries
+                                .map((entry) {
                               String userId = entry.key;
                               RequestedOfferStatus status = entry.value;
                               return Container(
@@ -239,13 +255,15 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
                                       backgroundColor: secondaryPurple,
                                       child: Text(
                                         userId.split('@')[0][0].toUpperCase(),
-                                        style: const TextStyle(color: Colors.white),
+                                        style: const TextStyle(
+                                            color: Colors.white),
                                       ),
                                     ),
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             userId.split('@')[0],
@@ -259,7 +277,9 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
                                               Text(
                                                 describeEnum(status),
                                                 style: TextStyle(
-                                                  color: Utils.requestStatusToColor(status),
+                                                  color: Utils
+                                                      .requestStatusToColor(
+                                                          status),
                                                   fontWeight: FontWeight.w500,
                                                 ),
                                               ),
@@ -275,13 +295,15 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
                                         _buildActionButton(
                                           icon: Icons.check,
                                           color: Colors.green,
-                                          onPressed: () => _handleAcceptRequest(userId, status),
+                                          onPressed: () => _handleAcceptRequest(
+                                              userId, status),
                                         ),
                                         const SizedBox(width: 8),
                                         _buildActionButton(
                                           icon: Icons.close,
                                           color: Colors.red,
-                                          onPressed: () => _handleRejectRequest(userId, status),
+                                          onPressed: () => _handleRejectRequest(
+                                              userId, status),
                                         ),
                                       ],
                                     ),
@@ -296,7 +318,8 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
                   ],
                   const SizedBox(height: 32.0),
                   Center(
-                    child: buildRideOfferActions(context, userState, currentUser),
+                    child:
+                        buildRideOfferActions(context, userState, currentUser),
                   ),
                   const SizedBox(height: 24.0),
                 ],
@@ -308,21 +331,27 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
   String _buildScheduleContent() {
     const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     List<String> scheduleParts = [];
-    
+
     if (widget.rideOffer.proposedLeaveTime != null) {
-      scheduleParts.add("Departure: ${widget.rideOffer.proposedLeaveTime!.format(context)}");
+      scheduleParts.add(
+          "Departure: ${widget.rideOffer.proposedLeaveTime!.format(context)}");
     }
-    
+
     if (widget.rideOffer.proposedBackTime != null) {
-      scheduleParts.add("Return: ${widget.rideOffer.proposedBackTime!.format(context)}");
+      scheduleParts
+          .add("Return: ${widget.rideOffer.proposedBackTime!.format(context)}");
     }
-    
-    scheduleParts.add("Days: ${widget.rideOffer.proposedWeekdays.map((i) => weekdays[i]).join(', ')}");
-    
+
+    scheduleParts.add(
+        "Days: ${widget.rideOffer.proposedWeekdays.map((i) => weekdays[i]).join(', ')}");
+
     return scheduleParts.join('\n');
   }
 
-  Widget _buildInfoCard({required String title, required String content, required IconData icon}) {
+  Widget _buildInfoCard(
+      {required String title,
+      required String content,
+      required IconData icon}) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -390,12 +419,14 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
     }
 
     setState(() => isRequesting = true);
-    final err = await widget.userState.currentUser!.acceptRideRequest(widget.rideOffer.id, userId);
+    final err = await widget.userState.currentUser!
+        .acceptRideRequest(widget.rideOffer.id, userId);
     setState(() => isRequesting = false);
 
     if (err == null) {
       setState(() {
-        widget.rideOffer.requestedUserIds[userId] = RequestedOfferStatus.ACCEPTED;
+        widget.rideOffer.requestedUserIds[userId] =
+            RequestedOfferStatus.ACCEPTED;
       });
       _showSnackBar('Ride request accepted!', Duration(seconds: 1));
     } else {
@@ -410,12 +441,14 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
     }
 
     setState(() => isRequesting = true);
-    final err = await widget.userState.currentUser!.rejectRideRequest(widget.rideOffer.id, userId);
+    final err = await widget.userState.currentUser!
+        .rejectRideRequest(widget.rideOffer.id, userId);
     setState(() => isRequesting = false);
 
     if (err == null) {
       setState(() {
-        widget.rideOffer.requestedUserIds[userId] = RequestedOfferStatus.REJECTED;
+        widget.rideOffer.requestedUserIds[userId] =
+            RequestedOfferStatus.REJECTED;
       });
       _showSnackBar('Ride request rejected!', Duration(seconds: 1));
     } else {
@@ -433,13 +466,15 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
     );
   }
 
-  Widget buildMyRideOfferActions(BuildContext context, UserState userState, UserModel currentUser) {
+  Widget buildMyRideOfferActions(
+      BuildContext context, UserState userState, UserModel currentUser) {
     return ElevatedButton(
       onPressed: () async {
         setState(() => isRequesting = true);
-        await FirebaseFunctions.deleteUserRideOfferByOfferId(currentUser, widget.rideOffer.id);
+        await FirebaseFunctions.deleteUserRideOfferByOfferId(
+            currentUser, widget.rideOffer.id);
         setState(() => isRequesting = false);
-        
+
         _showSnackBar('Ride offer deleted!', Duration(seconds: 1));
         Navigator.of(context).pop();
         refreshOffers();
@@ -469,12 +504,14 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
       ),
       onPressed: () async {
         if (driverUser == null) {
-          _showSnackBar('Driver information not available yet', Duration(seconds: 2));
+          _showSnackBar(
+              'Driver information not available yet', Duration(seconds: 2));
           return;
         }
-        
+
         setState(() => isRequesting = true);
-        final chatRoom = await currentUser.requestChatWithUser(widget.userState, driverUser!);
+        final chatRoom = await currentUser.requestChatWithUser(
+            widget.userState, driverUser!);
         setState(() => isRequesting = false);
 
         if (chatRoom != null) {
@@ -503,8 +540,10 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
     );
   }
 
-  Widget buildOtherRideOfferActions(BuildContext context, UserState userState, UserModel currentUser) {
-    final requestedOfferStatus = widget.rideOffer.requestedUserIds[currentUser.email];
+  Widget buildOtherRideOfferActions(
+      BuildContext context, UserState userState, UserModel currentUser) {
+    final requestedOfferStatus =
+        widget.rideOffer.requestedUserIds[currentUser.email];
 
     if (currentUser.requestedOfferIds.contains(widget.rideOffer.id)) {
       return Column(
@@ -514,7 +553,8 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
-              color: Utils.requestStatusToColor(requestedOfferStatus!).withOpacity(0.1),
+              color: Utils.requestStatusToColor(requestedOfferStatus!)
+                  .withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
@@ -549,14 +589,16 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
             ),
             onPressed: () async {
               setState(() => isRequesting = true);
-              final err = await currentUser.withdrawRequestRide(userState, widget.rideOffer.id);
+              final err = await currentUser.withdrawRequestRide(
+                  userState, widget.rideOffer.id);
               setState(() => isRequesting = false);
-              
+
               if (err == null) {
                 _showSnackBar('Ride request withdrawn!', Duration(seconds: 1));
                 Navigator.of(context).pop();
               } else {
-                _showSnackBar('Ride request withdraw failed! $err', Duration(seconds: 2));
+                _showSnackBar(
+                    'Ride request withdraw failed! $err', Duration(seconds: 2));
               }
               refreshOffers();
             },
@@ -585,9 +627,10 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
           ),
           onPressed: () async {
             setState(() => isRequesting = true);
-            final err = await currentUser.requestRide(userState, widget.rideOffer);
+            final err =
+                await currentUser.requestRide(userState, widget.rideOffer);
             setState(() => isRequesting = false);
-            
+
             if (err == null) {
               _showSnackBar('Ride request sent!', Duration(seconds: 1));
               Navigator.of(context).pop();
@@ -610,7 +653,8 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
     );
   }
 
-  Widget buildRideOfferActions(BuildContext context, UserState userState, UserModel currentUser) {
+  Widget buildRideOfferActions(
+      BuildContext context, UserState userState, UserModel currentUser) {
     return currentUser.email != widget.rideOffer.driverId
         ? buildOtherRideOfferActions(context, userState, currentUser)
         : buildMyRideOfferActions(context, userState, currentUser);

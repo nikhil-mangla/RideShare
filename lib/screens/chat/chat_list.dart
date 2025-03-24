@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:corider/providers/user_state.dart';
-import 'package:corider/screens/chat/chat.dart';
-import 'package:corider/extensions.dart';
-import 'package:corider/utils/utils.dart';
-import 'package:corider/widgets/notification_badge.dart';
+import 'package:rideshare/providers/user_state.dart';
+import 'package:rideshare/screens/chat/chat.dart';
+import 'package:rideshare/extensions.dart';
+import 'package:rideshare/utils/utils.dart';
+import 'package:rideshare/widgets/notification_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
@@ -32,7 +32,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
     await widget.userState.fetchAllChatRooms();
     setState(() {
       totalNotifications = widget.userState.totalNotifications;
-      chatRooms = widget.userState.storedChatRooms.values.toList().sortedRooms();
+      chatRooms =
+          widget.userState.storedChatRooms.values.toList().sortedRooms();
       isBackgroundFethching = false;
     });
   }
@@ -83,7 +84,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final totalNotificaiotns = totalNotifications.values.fold(0, (a, b) => a + b);
+    final totalNotificaiotns =
+        totalNotifications.values.fold(0, (a, b) => a + b);
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -133,7 +135,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
       } else {
         lastMessageText = '[Attachment]';
       }
-      return lastMessage.author.id == 'notifications' ? lastMessageText : '$authorFirstName: $lastMessageText';
+      return lastMessage.author.id == 'notifications'
+          ? lastMessageText
+          : '$authorFirstName: $lastMessageText';
     } else {
       return 'No messages yet';
     }
@@ -158,11 +162,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
               ),
             ),
           ).then((value) async {
-            final newChatRoom = await widget.userState.getStoredChatRoomByRoomId(chatRoom.id);
+            final newChatRoom =
+                await widget.userState.getStoredChatRoomByRoomId(chatRoom.id);
             // reload chatRoom
             setState(() {
               isBackgroundFethching = true;
-              final index = chatRooms.indexWhere((element) => element.id == chatRoom.id);
+              final index =
+                  chatRooms.indexWhere((element) => element.id == chatRoom.id);
               if (newChatRoom != null) {
                 chatRooms[index] = newChatRoom;
               } else {
@@ -190,7 +196,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
                     padding: const EdgeInsets.only(right: 10),
                     child: CircleAvatar(
                       radius: 30,
-                      backgroundColor: Utils.getUserAvatarNameColor(chatRoom.id),
+                      backgroundColor:
+                          Utils.getUserAvatarNameColor(chatRoom.id),
                       child: chatRoom.imageUrl == null
                           ? Icon(
                               chatRoom.type == types.RoomType.group
@@ -205,8 +212,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
                               child: CachedNetworkImage(
                                 imageUrl: chatRoom.imageUrl!,
                                 fit: BoxFit.cover,
-                                placeholder: (context, url) => const CircularProgressIndicator(),
-                                errorWidget: (context, url, error) => const Icon(Icons.error),
+                                placeholder: (context, url) =>
+                                    const CircularProgressIndicator(),
+                                errorWidget: (context, url, error) =>
+                                    const Icon(Icons.error),
                               ),
                             ),
                     ),
@@ -230,13 +239,18 @@ class _ChatListScreenState extends State<ChatListScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(chatRoom.name ?? 'Loading...',
-                            maxLines: 1, style: TextStyle(color: Utils.getUserAvatarNameColor(chatRoom.id))),
+                            maxLines: 1,
+                            style: TextStyle(
+                                color:
+                                    Utils.getUserAvatarNameColor(chatRoom.id))),
                         if (chatRoom.lastMessages?.first != null)
                           Text(
-                              DateTime.fromMillisecondsSinceEpoch(chatRoom.lastMessages!.first.createdAt!)
+                              DateTime.fromMillisecondsSinceEpoch(
+                                      chatRoom.lastMessages!.first.createdAt!)
                                   .getFormattedString(),
                               maxLines: 1,
-                              style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                              style: const TextStyle(
+                                  color: Colors.grey, fontSize: 12)),
                       ],
                     ),
                   ),

@@ -1,9 +1,9 @@
-import 'package:corider/models/ride_offer_model.dart';
-import 'package:corider/models/user_model.dart';
-import 'package:corider/providers/user_state.dart';
-import 'package:corider/screens/profile/user_profile_screen.dart';
-import 'package:corider/screens/ride/exploreRides/ride_offer_detail_screen.dart';
-import 'package:corider/utils/utils.dart';
+import 'package:rideshare/models/ride_offer_model.dart';
+import 'package:rideshare/models/user_model.dart';
+import 'package:rideshare/providers/user_state.dart';
+import 'package:rideshare/screens/profile/user_profile_screen.dart';
+import 'package:rideshare/screens/ride/exploreRides/ride_offer_detail_screen.dart';
+import 'package:rideshare/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -41,7 +41,8 @@ class _RideOfferCardState extends State<RideOfferCard> {
     if (widget.userState.storedUsers.containsKey(widget.rideOffer.driverId)) {
       fetchedDriver = widget.userState.storedUsers[widget.rideOffer.driverId];
     } else {
-      fetchedDriver = await widget.userState.getStoredUserByEmail(widget.rideOffer.driverId);
+      fetchedDriver = await widget.userState
+          .getStoredUserByEmail(widget.rideOffer.driverId);
     }
     setState(() {
       driver = fetchedDriver;
@@ -53,7 +54,8 @@ class _RideOfferCardState extends State<RideOfferCard> {
     super.initState();
     getDriver();
     // Debug the initial value of destinationLocationName
-    debugPrint("Initial destination location name: ${widget.rideOffer.destinationLocationName}");
+    debugPrint(
+        "Initial destination location name: ${widget.rideOffer.destinationLocationName}");
   }
 
   Widget _buildListView() {
@@ -76,7 +78,8 @@ class _RideOfferCardState extends State<RideOfferCard> {
                     : null,
                 child: driver!.profileImage == null
                     ? Text(
-                        driver!.firstName.isNotEmpty && driver!.lastName.isNotEmpty
+                        driver!.firstName.isNotEmpty &&
+                                driver!.lastName.isNotEmpty
                             ? '${driver!.firstName[0].toUpperCase()}${driver!.lastName[0].toUpperCase()}'
                             : driver!.firstName.isNotEmpty
                                 ? driver!.firstName[0].toUpperCase()
@@ -87,8 +90,10 @@ class _RideOfferCardState extends State<RideOfferCard> {
                         child: CachedNetworkImage(
                           imageUrl: driver!.profileImage!,
                           fit: BoxFit.cover,
-                          placeholder: (context, url) => const CircularProgressIndicator(),
-                          errorWidget: (context, url, error) => const Icon(Icons.error),
+                          placeholder: (context, url) =>
+                              const CircularProgressIndicator(),
+                          errorWidget: (context, url, error) =>
+                              const Icon(Icons.error),
                         ),
                       ),
               ),
@@ -106,7 +111,8 @@ class _RideOfferCardState extends State<RideOfferCard> {
           ),
           if (widget.currentLocation != null)
             Text(
-              Utils.getDistanceByTwoLocation(widget.currentLocation!, widget.rideOffer.driverLocation),
+              Utils.getDistanceByTwoLocation(
+                  widget.currentLocation!, widget.rideOffer.driverLocation),
               style: const TextStyle(color: Colors.grey),
             ),
         ],
@@ -123,7 +129,8 @@ class _RideOfferCardState extends State<RideOfferCard> {
                     Flexible(
                       child: Text(
                         widget.rideOffer.proposedLeaveTime != null
-                            ? widget.rideOffer.proposedLeaveTime!.format(context)
+                            ? widget.rideOffer.proposedLeaveTime!
+                                .format(context)
                             : 'N/A',
                         style: const TextStyle(fontWeight: FontWeight.w500),
                         overflow: TextOverflow.ellipsis,
@@ -146,7 +153,9 @@ class _RideOfferCardState extends State<RideOfferCard> {
               Padding(
                 padding: const EdgeInsets.only(left: 8.0),
                 child: Text(
-                  widget.rideOffer.price == 0.0 ? 'Free' : '${widget.rideOffer.price}',
+                  widget.rideOffer.price == 0.0
+                      ? 'Free'
+                      : '${widget.rideOffer.price}',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
@@ -199,7 +208,6 @@ class _RideOfferCardState extends State<RideOfferCard> {
     // Debug ride offer details during build
     debugPrint("Building RideOfferCard for offer ID: ${widget.rideOffer.id}");
     debugPrint("Driver location name: ${widget.rideOffer.driverLocationName}");
-   
 
     return GestureDetector(
       onTap: () {
@@ -231,11 +239,10 @@ class _RideOfferCardState extends State<RideOfferCard> {
                   ),
                   const SizedBox(height: 8.0),
                   Text(
-                    widget.rideOffer.driverLocationName ?? 'Pickup location not provided',
+                    widget.rideOffer.driverLocationName ??
+                        'Pickup location not provided',
                     style: const TextStyle(color: Colors.black87),
                   ),
-                 
-                 
                 ],
               ),
             ),

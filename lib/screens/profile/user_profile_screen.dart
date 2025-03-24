@@ -1,12 +1,13 @@
-import 'package:corider/models/user_model.dart';
-import 'package:corider/utils/utils.dart';
+import 'package:rideshare/models/user_model.dart';
+import 'package:rideshare/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 class UserProfileScreen extends StatefulWidget {
   final UserModel user;
   final bool isCurrentUser;
 
-  const UserProfileScreen({super.key, required this.user, this.isCurrentUser = false});
+  const UserProfileScreen(
+      {super.key, required this.user, this.isCurrentUser = false});
 
   @override
   State<UserProfileScreen> createState() => _UserProfileScreenState();
@@ -17,7 +18,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: widget.isCurrentUser ? const Text('Profile') : Text(widget.user.fullName),
+        title: widget.isCurrentUser
+            ? const Text('Profile')
+            : Text(widget.user.fullName),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -67,7 +70,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               ListTile(
                 leading: const Icon(Icons.car_rental),
                 title: const Text('Make-Model'),
-                subtitle: Text('${widget.user.vehicle!.make ?? 'N/A'} ${widget.user.vehicle!.model ?? 'N/A'}'),
+                subtitle: Text(
+                    '${widget.user.vehicle!.make ?? 'N/A'} ${widget.user.vehicle!.model ?? 'N/A'}'),
               ),
               ListTile(
                 leading: const Icon(Icons.color_lens),
@@ -77,7 +81,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     Container(
                       width: 16,
                       height: 16,
-                      color: Utils.getColorFromValue(widget.user.vehicle!.color ?? 'N/A'),
+                      color: Utils.getColorFromValue(
+                          widget.user.vehicle!.color ?? 'N/A'),
                       margin: const EdgeInsets.only(right: 8),
                     ),
                     Text(widget.user.vehicle!.color ?? 'N/A'),
@@ -92,7 +97,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               ListTile(
                 leading: const Icon(Icons.event_seat),
                 title: const Text('Available Seats'),
-                subtitle: Text(widget.user.vehicle!.availableSeats?.toString() ?? 'N/A'),
+                subtitle: Text(
+                    widget.user.vehicle!.availableSeats?.toString() ?? 'N/A'),
               ),
             ] else
               const ListTile(

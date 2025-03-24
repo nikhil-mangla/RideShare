@@ -1,28 +1,26 @@
-import 'package:corider/providers/user_state.dart';
-import 'package:corider/screens/chat/chat_list.dart';
-import 'package:corider/screens/home/upcoming_rides.dart';
-import 'package:corider/screens/home/my_offers.dart';
-import 'package:corider/widgets/notification_badge.dart';
+import 'package:rideshare/providers/user_state.dart';
+import 'package:rideshare/screens/chat/chat_list.dart';
+import 'package:rideshare/screens/home/upcoming_rides.dart';
+import 'package:rideshare/screens/home/my_offers.dart';
+import 'package:rideshare/widgets/notification_badge.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(int) changePageIndex;
   final UserState userState;
-  
-  const HomeScreen({
-    super.key, 
-    required this.userState, 
-    required this.changePageIndex
-  });
-  
+
+  const HomeScreen(
+      {super.key, required this.userState, required this.changePageIndex});
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   bool isLoadingOffers = false;
   late TabController _tabController;
-  
+
   // Color scheme
   final Color primaryPurple = const Color(0xFF6200EE);
   final Color secondaryPurple = const Color(0xFF9C27B0);
@@ -30,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   final Color background = Colors.white;
   final Color textDark = const Color(0xFF212121);
   final Color textLight = const Color(0xFF757575);
-  
+
   Future<void> fetchAllOffers() async {
     setState(() {
       isLoadingOffers = true;
@@ -40,20 +38,20 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       isLoadingOffers = false;
     });
   }
-  
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     if (widget.userState.storedOffers.isEmpty) fetchAllOffers();
   }
-  
+
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -128,12 +126,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: IconButton(
-                        icon: const Icon(Icons.chat_bubble_rounded, color: Colors.white),
+                        icon: const Icon(Icons.chat_bubble_rounded,
+                            color: Colors.white),
                         onPressed: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ChatListScreen(userState: widget.userState),
+                              builder: (context) =>
+                                  ChatListScreen(userState: widget.userState),
                             ),
                           );
                         },
@@ -142,9 +142,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     if (widget.userState.totalNotificationsCount != 0)
                       Positioned(
                         top: 7,
-                        right: widget.userState.totalNotificationsCount > 9 ? 8 : 13,
+                        right: widget.userState.totalNotificationsCount > 9
+                            ? 8
+                            : 13,
                         child: NotificationBadge(
-                          totalNotifications: widget.userState.totalNotificationsCount,
+                          totalNotifications:
+                              widget.userState.totalNotificationsCount,
                           forTotal: true,
                         ),
                       ),
@@ -223,7 +226,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Navigate to create offer screen
-          widget.changePageIndex(1); // Assuming 1 is the index for the create offer page
+          widget.changePageIndex(
+              1); // Assuming 1 is the index for the create offer page
         },
         backgroundColor: primaryPurple,
         foregroundColor: Colors.white,
@@ -232,7 +236,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildTabContent(Widget child) {
     return Container(
       padding: const EdgeInsets.only(top: 8),
@@ -257,8 +261,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(
-    BuildContext context, 
-    double shrinkOffset, 
+    BuildContext context,
+    double shrinkOffset,
     bool overlapsContent,
   ) {
     return Container(

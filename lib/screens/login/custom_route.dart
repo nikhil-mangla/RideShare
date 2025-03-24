@@ -1,4 +1,4 @@
-import 'package:corider/screens/login/login.dart';
+import 'package:rideshare/screens/login/login.dart';
 import 'package:flutter/material.dart';
 
 class FadePageRoute<T> extends MaterialPageRoute<T> {

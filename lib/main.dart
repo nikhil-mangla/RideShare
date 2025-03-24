@@ -1,12 +1,12 @@
-import 'package:corider/screens/root.dart';
-import 'package:corider/screens/login/login.dart';
-import 'package:corider/providers/user_state.dart';
+import 'package:rideshare/screens/root.dart';
+import 'package:rideshare/screens/login/login.dart';
+import 'package:rideshare/providers/user_state.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 import 'cloud_functions/firebase_options.dart';
 import 'package:provider/provider.dart';
-import 'package:corider/providers/push_notificaions/local_notification_service.dart';
+import 'package:rideshare/providers/push_notificaions/local_notification_service.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -68,7 +68,7 @@ class _MyAppState extends State<MyApp> {
     final userState = Provider.of<UserState>(context);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'CoRider',
+      title: 'rideshare',
       theme: ThemeData(
         primarySwatch: Colors.lightBlue,
       ),

@@ -1,4 +1,4 @@
-import 'package:corider/providers/place_api_provider.dart';
+import 'package:rideshare/providers/place_api_provider.dart';
 import 'package:flutter/material.dart';
 
 class AddressSearch extends SearchDelegate<Suggestion> {

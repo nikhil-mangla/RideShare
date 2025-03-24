@@ -1,10 +1,10 @@
-import 'package:corider/models/ride_offer_model.dart';
-import 'package:corider/models/user_model.dart';
-import 'package:corider/providers/user_state.dart';
-import 'package:corider/models/vehicle_model.dart';
-import 'package:corider/screens/ride/createRideOffer/address_search_screen.dart';
-import 'package:corider/screens/profile/add_vehicle_screen.dart';
-import 'package:corider/utils/utils.dart';
+import 'package:rideshare/models/ride_offer_model.dart';
+import 'package:rideshare/models/user_model.dart';
+import 'package:rideshare/providers/user_state.dart';
+import 'package:rideshare/models/vehicle_model.dart';
+import 'package:rideshare/screens/ride/createRideOffer/address_search_screen.dart';
+import 'package:rideshare/screens/profile/add_vehicle_screen.dart';
+import 'package:rideshare/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -32,23 +32,25 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
   TimeOfDay proposedLeaveTime = const TimeOfDay(hour: 8, minute: 30);
   TimeOfDay proposedBackTime = const TimeOfDay(hour: 17, minute: 00);
   List<int> proposedWeekdays = [1, 2, 3, 4, 5];
-  
+
   // Driver location
   String? driverLocationName;
   LatLng? driverLocation;
-  
+
   // Destination location
   String? destinationLocationName;
   LatLng? destinationLocation;
-  
+
   double price = 0.0;
   VehicleModel? vehicle;
   String additionalDetails = '';
   bool isSubmitting = false;
-  
+
   // For manually adding location
-  final TextEditingController _manualLocationController = TextEditingController();
-  final TextEditingController _manualDestinationController = TextEditingController();
+  final TextEditingController _manualLocationController =
+      TextEditingController();
+  final TextEditingController _manualDestinationController =
+      TextEditingController();
   bool _showManualLocationInput = false;
   bool _showManualDestinationInput = false;
 
@@ -98,10 +100,10 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
   }
 
   void _submitManualLocation(bool isDriverLocation) {
-    final text = isDriverLocation 
+    final text = isDriverLocation
         ? _manualLocationController.text
         : _manualDestinationController.text;
-        
+
     if (text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -111,14 +113,14 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
       );
       return;
     }
-    
+
     // For demonstration purposes, using a placeholder coordinate
     // In a real app, you would use geocoding service to convert address to coordinates
     final placeholderCoordinate = LatLng(
       37.7749 + (isDriverLocation ? 0 : 0.05), // Small offset for destination
       -122.4194 + (isDriverLocation ? 0 : 0.05),
     );
-    
+
     setState(() {
       if (isDriverLocation) {
         driverLocationName = text;
@@ -138,7 +140,7 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
   Widget build(BuildContext context) {
     final userState = Provider.of<UserState>(context);
     final UserModel currentUser = userState.currentUser!;
-    
+
     if (currentUser.vehicle != null && vehicle == null) {
       setState(() {
         vehicle = currentUser.vehicle;
@@ -189,7 +191,8 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
                         const SizedBox(height: 16.0),
                         Row(
                           children: [
-                            const Icon(Icons.departure_board, color: lightPurple),
+                            const Icon(Icons.departure_board,
+                                color: lightPurple),
                             const SizedBox(width: 8.0),
                             const Text('Departure:'),
                             const SizedBox(width: 8.0),
@@ -211,7 +214,8 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
                         const SizedBox(height: 12.0),
                         Row(
                           children: [
-                            const Icon(Icons.keyboard_return, color: lightPurple),
+                            const Icon(Icons.keyboard_return,
+                                color: lightPurple),
                             const SizedBox(width: 8.0),
                             const Text('Return:'),
                             const SizedBox(width: 24.0),
@@ -230,7 +234,6 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
                             ),
                           ],
                         ),
-                        
                         const SizedBox(height: 16.0),
                         const Text(
                           'Days of Week',
@@ -244,17 +247,16 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            for (int i = 0; i < 7; i++)
-                              _buildDaySelector(i),
+                            for (int i = 0; i < 7; i++) _buildDaySelector(i),
                           ],
                         ),
                       ],
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 16.0),
-                
+
                 // Location Card
                 Card(
                   elevation: 2,
@@ -275,7 +277,7 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
                           ),
                         ),
                         const SizedBox(height: 16.0),
-                        
+
                         // Driver Location Section
                         Row(
                           children: [
@@ -295,12 +297,13 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
                         else if (driverLocationName == null)
                           _buildLocationSelectionButtons(true)
                         else
-                          _buildSelectedLocationDisplay(driverLocationName!, true),
-                        
+                          _buildSelectedLocationDisplay(
+                              driverLocationName!, true),
+
                         const SizedBox(height: 16.0),
                         const Divider(),
                         const SizedBox(height: 16.0),
-                        
+
                         // Destination Location Section
                         Row(
                           children: [
@@ -320,14 +323,15 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
                         else if (destinationLocationName == null)
                           _buildLocationSelectionButtons(false)
                         else
-                          _buildSelectedLocationDisplay(destinationLocationName!, false),
+                          _buildSelectedLocationDisplay(
+                              destinationLocationName!, false),
                       ],
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 16.0),
-                
+
                 // Vehicle and Price Card
                 Card(
                   elevation: 2,
@@ -348,87 +352,90 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
                           ),
                         ),
                         const SizedBox(height: 16.0),
-                        
+
                         // Vehicle Section
                         Row(
                           children: [
-                            const Icon(Icons.directions_car, color: lightPurple),
+                            const Icon(Icons.directions_car,
+                                color: lightPurple),
                             const SizedBox(width: 8.0),
                             const Text('Vehicle:'),
                           ],
                         ),
                         const SizedBox(height: 8.0),
                         vehicle == null
-                          ? ElevatedButton.icon(
-                              icon: const Icon(Icons.add),
-                              label: const Text('Add Vehicle'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: primaryPurple,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                              ),
-                              onPressed: () => {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => AddVehiclePage(
-                                      vehicle: currentUser.vehicle,
-                                    ),
+                            ? ElevatedButton.icon(
+                                icon: const Icon(Icons.add),
+                                label: const Text('Add Vehicle'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: primaryPurple,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
                                   ),
                                 ),
-                                setState(() {
-                                  vehicle = currentUser.vehicle;
-                                }),
-                              },
-                            )
-                          : Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                color: Colors.grey[100],
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 24,
-                                    height: 24,
-                                    decoration: BoxDecoration(
-                                      color: Utils.getColorFromValue(vehicle!.color!),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      vehicle!.fullName,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
+                                onPressed: () => {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => AddVehiclePage(
+                                        vehicle: currentUser.vehicle,
                                       ),
                                     ),
                                   ),
-                                  IconButton(
-                                    icon: const Icon(Icons.edit, size: 18),
-                                    onPressed: () => {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => AddVehiclePage(
-                                            vehicle: vehicle,
-                                          ),
+                                  setState(() {
+                                    vehicle = currentUser.vehicle;
+                                  }),
+                                },
+                              )
+                            : Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.grey[100],
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 24,
+                                      height: 24,
+                                      decoration: BoxDecoration(
+                                        color: Utils.getColorFromValue(
+                                            vehicle!.color!),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        vehicle!.fullName,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                    },
-                                  ),
-                                ],
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.edit, size: 18),
+                                      onPressed: () => {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                AddVehiclePage(
+                                              vehicle: vehicle,
+                                            ),
+                                          ),
+                                        ),
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                        
+
                         const SizedBox(height: 16.0),
                         const Divider(),
                         const SizedBox(height: 16.0),
-                        
+
                         // Price Section
                         Row(
                           children: [
@@ -448,9 +455,11 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
                             filled: true,
                             fillColor: Colors.grey[100],
                           ),
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(r'^\d{0,4}(\.\d{0,2})?$')),
+                            FilteringTextInputFormatter.allow(
+                                RegExp(r'^\d{0,4}(\.\d{0,2})?$')),
                           ],
                           onChanged: (value) {
                             setState(() {
@@ -458,11 +467,11 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
                             });
                           },
                         ),
-                        
+
                         const SizedBox(height: 16.0),
                         const Divider(),
                         const SizedBox(height: 16.0),
-                        
+
                         // Additional Details Section
                         Row(
                           children: [
@@ -474,7 +483,8 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
                         const SizedBox(height: 8.0),
                         TextFormField(
                           decoration: InputDecoration(
-                            hintText: 'Any other information riders should know...',
+                            hintText:
+                                'Any other information riders should know...',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -492,124 +502,132 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 24.0),
-                
+
                 // Submit Button
                 SizedBox(
                   width: double.infinity,
                   height: 50,
                   child: isSubmitting
-                    ? const Center(
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(primaryPurple),
-                        ),
-                      )
-                    : ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryPurple,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(primaryPurple),
                           ),
-                          elevation: 3,
-                        ),
-                        onPressed: () async {
-                          setState(() {
-                            isSubmitting = true;
-                          });
-                          
-                          // Validation
-                          if (driverLocationName == null || driverLocation == null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Please select your pickup location'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
+                        )
+                      : ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryPurple,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            elevation: 3,
+                          ),
+                          onPressed: () async {
                             setState(() {
-                              isSubmitting = false;
+                              isSubmitting = true;
                             });
-                            return;
-                          }
-                          
-                          if (destinationLocationName == null || destinationLocation == null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Please select your destination'),
-                                backgroundColor: Colors.red,
-                              ),
+
+                            // Validation
+                            if (driverLocationName == null ||
+                                driverLocation == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      'Please select your pickup location'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              setState(() {
+                                isSubmitting = false;
+                              });
+                              return;
+                            }
+
+                            if (destinationLocationName == null ||
+                                destinationLocation == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content:
+                                      Text('Please select your destination'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              setState(() {
+                                isSubmitting = false;
+                              });
+                              return;
+                            }
+
+                            if (vehicle == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Please select your vehicle'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              setState(() {
+                                isSubmitting = false;
+                              });
+                              return;
+                            }
+
+                            // Create ride offer model
+                            // This needs to be updated to include the destination in your RideOfferModel
+                            final rideOffer = RideOfferModel(
+                              createdAt: DateTime.now(),
+                              driverId: currentUser.email,
+                              proposedLeaveTime: proposedLeaveTime,
+                              proposedBackTime: proposedBackTime,
+                              proposedWeekdays: proposedWeekdays,
+                              driverLocationName: driverLocationName!,
+                              driverLocation: driverLocation!,
+                              destinationLocationName: destinationLocationName!,
+                              destinationLocation: destinationLocation!,
+                              vehicleId: vehicle!.id,
+                              price: price,
+                              additionalDetails: additionalDetails,
                             );
-                            setState(() {
-                              isSubmitting = false;
-                            });
-                            return;
-                          }
-                          
-                          if (vehicle == null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Please select your vehicle'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                            setState(() {
-                              isSubmitting = false;
-                            });
-                            return;
-                          }
-                          
-                          // Create ride offer model
-                          // This needs to be updated to include the destination in your RideOfferModel
-                          final rideOffer = RideOfferModel(
-                            createdAt: DateTime.now(),
-                            driverId: currentUser.email,
-                            proposedLeaveTime: proposedLeaveTime,
-                            proposedBackTime: proposedBackTime,
-                            proposedWeekdays: proposedWeekdays,
-                            driverLocationName: driverLocationName!,
-                            driverLocation: driverLocation!,
-                            
-                            destinationLocationName: destinationLocationName!,
-                            destinationLocation: destinationLocation!,
-                            vehicleId: vehicle!.id,
-                            price: price,
-                            additionalDetails: additionalDetails,
-                          );
-                          
-                          // Save the ride offer
-                          try {
-                            await currentUser.createRideOffer(userState, rideOffer);
-                            
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Ride offer created successfully!'),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
-                            
-                            Navigator.pop(context);
-                            widget.refreshOffersIndicatorKey?.currentState?.show();
-                          } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Error creating ride offer: $e'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                            setState(() {
-                              isSubmitting = false;
-                            });
-                          }
-                        },
-                        child: const Text(
-                          'CREATE RIDE OFFER',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+
+                            // Save the ride offer
+                            try {
+                              await currentUser.createRideOffer(
+                                  userState, rideOffer);
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content:
+                                      Text('Ride offer created successfully!'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+
+                              Navigator.pop(context);
+                              widget.refreshOffersIndicatorKey?.currentState
+                                  ?.show();
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content:
+                                      Text('Error creating ride offer: $e'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              setState(() {
+                                isSubmitting = false;
+                              });
+                            }
+                          },
+                          child: const Text(
+                            'CREATE RIDE OFFER',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
                 ),
               ],
             ),
@@ -618,7 +636,7 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
       ),
     );
   }
-  
+
   Widget _buildDaySelector(int dayIndex) {
     final isSelected = proposedWeekdays.contains(dayIndex);
     return GestureDetector(
@@ -663,7 +681,7 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
       ),
     );
   }
-  
+
   Widget _buildLocationSelectionButtons(bool isDriverLocation) {
     return Row(
       children: [
@@ -722,13 +740,13 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
       ],
     );
   }
-  
+
   Widget _buildManualLocationInput(bool isDriverLocation) {
     return Column(
       children: [
         TextField(
-          controller: isDriverLocation 
-              ? _manualLocationController 
+          controller: isDriverLocation
+              ? _manualLocationController
               : _manualDestinationController,
           decoration: InputDecoration(
             hintText: isDriverLocation
@@ -788,8 +806,9 @@ class _CreateRideOfferScreenState extends State<CreateRideOfferScreen> {
       ],
     );
   }
-  
-  Widget _buildSelectedLocationDisplay(String locationName, bool isDriverLocation) {
+
+  Widget _buildSelectedLocationDisplay(
+      String locationName, bool isDriverLocation) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(

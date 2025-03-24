@@ -1,21 +1,23 @@
-import 'package:corider/providers/user_state.dart';
-import 'package:corider/screens/ride/createRideOffer/create_ride_offer_screen.dart';
-import 'package:corider/screens/ride/exploreRides/ride_offer_detail_screen.dart';
-import 'package:corider/utils/utils.dart';
+import 'package:rideshare/providers/user_state.dart';
+import 'package:rideshare/screens/ride/createRideOffer/create_ride_offer_screen.dart';
+import 'package:rideshare/screens/ride/exploreRides/ride_offer_detail_screen.dart';
+import 'package:rideshare/utils/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:corider/models/ride_offer_model.dart';
+import 'package:rideshare/models/ride_offer_model.dart';
 
 class MyOffers extends StatefulWidget {
   final UserState userState;
   final Function() fetchAllOffers;
-  const MyOffers({super.key, required this.userState, required this.fetchAllOffers});
+  const MyOffers(
+      {super.key, required this.userState, required this.fetchAllOffers});
 
   @override
   MyOffersState createState() => MyOffersState();
 }
 
 class MyOffersState extends State<MyOffers> {
-  GlobalKey<RefreshIndicatorState> refreshMyOffersIndicatorKey = GlobalKey<RefreshIndicatorState>();
+  GlobalKey<RefreshIndicatorState> refreshMyOffersIndicatorKey =
+      GlobalKey<RefreshIndicatorState>();
   List<RideOfferModel> myOffers = [];
 
   Future<void> fetchMyOffers() async {
@@ -24,7 +26,8 @@ class MyOffersState extends State<MyOffers> {
 
   void getMyOffers() {
     final myOffers = widget.userState.storedOffers.entries
-        .where((offer) => widget.userState.currentUser!.myOfferIds.contains(offer.key))
+        .where((offer) =>
+            widget.userState.currentUser!.myOfferIds.contains(offer.key))
         .map((offer) => offer.value)
         .toList();
     setState(() {
@@ -60,7 +63,8 @@ class MyOffersState extends State<MyOffers> {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) => const CreateRideOfferScreen()))
+                    .push(MaterialPageRoute(
+                        builder: (context) => const CreateRideOfferScreen()))
                     .then((_) => fetchMyOffers());
               },
               child: const Text('Create Ride Offer'),
@@ -79,7 +83,8 @@ class MyOffersState extends State<MyOffers> {
             final rideOffer = myOffers[index];
 
             return ListTile(
-              title: Text(Utils.getShortLocationName(rideOffer.driverLocationName)),
+              title: Text(
+                  Utils.getShortLocationName(rideOffer.driverLocationName)),
               subtitle: Text(
                   '${rideOffer.proposedLeaveTime!.format(context)} - ${rideOffer.proposedBackTime!.format(context)}'),
               // Customize the tile as needed with other ride offer information

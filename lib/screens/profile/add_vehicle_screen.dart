@@ -1,6 +1,6 @@
-import 'package:corider/providers/user_state.dart';
-import 'package:corider/models/vehicle_model.dart';
-import 'package:corider/utils/utils.dart';
+import 'package:rideshare/providers/user_state.dart';
+import 'package:rideshare/models/vehicle_model.dart';
+import 'package:rideshare/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';

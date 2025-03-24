@@ -1,9 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:corider/cloud_functions/firebase_function.dart';
-import 'package:corider/providers/user_state.dart';
-import 'package:corider/screens/login/login.dart';
-import 'package:corider/screens/profile/add_vehicle_screen.dart';
-import 'package:corider/screens/profile/user_profile_screen.dart';
+import 'package:rideshare/cloud_functions/firebase_function.dart';
+import 'package:rideshare/providers/user_state.dart';
+import 'package:rideshare/screens/login/login.dart';
+import 'package:rideshare/screens/profile/add_vehicle_screen.dart';
+import 'package:rideshare/screens/profile/user_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -24,13 +24,13 @@ class ProfileScreen extends StatelessWidget {
     final Color background = Colors.white;
     final Color textDark = const Color(0xFF212121);
     final Color textLight = const Color(0xFF757575);
-    
+
     final userState = Provider.of<UserState>(context);
     final currentUser = userState.currentUser;
     ValueNotifier<String?> profileImageNotifier =
         ValueNotifier<String?>(currentUser?.profileImage);
     ValueNotifier<bool> showFullNameNotifier =
-    ValueNotifier<bool>(currentUser?.showFullName ?? true);
+        ValueNotifier<bool>(currentUser?.showFullName ?? true);
 
     void handleUploadPhoto() async {
       final imagePicker = ImagePicker();
@@ -289,7 +289,8 @@ class ProfileScreen extends StatelessWidget {
                 Container(
                   width: double.infinity,
                   color: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 20.0),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 24.0, horizontal: 20.0),
                   child: Column(
                     children: [
                       Stack(
@@ -324,11 +325,14 @@ class ProfileScreen extends StatelessWidget {
                                             width: 100,
                                             height: 100,
                                             fit: BoxFit.cover,
-                                            placeholder: (context, url) => const Center(
-                                              child: CircularProgressIndicator(),
+                                            placeholder: (context, url) =>
+                                                const Center(
+                                              child:
+                                                  CircularProgressIndicator(),
                                             ),
-                                            errorWidget: (context, url, error) =>
-                                                const Icon(Icons.error),
+                                            errorWidget:
+                                                (context, url, error) =>
+                                                    const Icon(Icons.error),
                                           ),
                                         ),
                                 ),
@@ -363,13 +367,14 @@ class ProfileScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 // User Information Card
                 Container(
                   padding: const EdgeInsets.all(16),
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
@@ -433,7 +438,8 @@ class ProfileScreen extends StatelessWidget {
                                     ? (currentUser?.fullName ?? 'Unknown Name')
                                     : (currentUser?.fullName
                                             .split(' ')
-                                            .map((e) => e.isNotEmpty ? e[0] : '')
+                                            .map(
+                                                (e) => e.isNotEmpty ? e[0] : '')
                                             .join('') ??
                                         'UN'),
                                 Icons.person,
@@ -457,12 +463,16 @@ class ProfileScreen extends StatelessWidget {
                                 child: TextButton.icon(
                                   onPressed: toggleNameVisibility,
                                   icon: Icon(
-                                    showFullName ? Icons.visibility_off : Icons.visibility,
+                                    showFullName
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
                                     size: 18,
                                     color: primaryPurple,
                                   ),
                                   label: Text(
-                                    showFullName ? 'Show Initials Only' : 'Show Full Name',
+                                    showFullName
+                                        ? 'Show Initials Only'
+                                        : 'Show Full Name',
                                     style: TextStyle(
                                       color: primaryPurple,
                                     ),
@@ -482,11 +492,12 @@ class ProfileScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                
+
                 // Vehicle Information
                 Container(
                   padding: const EdgeInsets.all(16),
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
@@ -549,11 +560,12 @@ class ProfileScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                
+
                 // Emergency Services
                 Container(
                   padding: const EdgeInsets.all(16),
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
@@ -640,11 +652,12 @@ class ProfileScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                
+
                 // Account Actions
                 Container(
                   padding: const EdgeInsets.all(16),
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
@@ -739,12 +752,14 @@ class ProfileScreen extends StatelessWidget {
                               width: double.infinity,
                               child: OutlinedButton.icon(
                                 onPressed: () => handleDeleteAccount(context),
-                                icon: const Icon(Icons.delete_forever, size: 18),
+                                icon:
+                                    const Icon(Icons.delete_forever, size: 18),
                                 label: const Text('Delete Account'),
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: Colors.red,
                                   side: const BorderSide(color: Colors.red),
-                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 10),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
@@ -757,7 +772,7 @@ class ProfileScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
               ],
             ),
@@ -766,8 +781,9 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
-  
-  Widget _buildInfoRow(String label, String value, IconData icon, Color iconColor) {
+
+  Widget _buildInfoRow(
+      String label, String value, IconData icon, Color iconColor) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -803,14 +819,9 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
-  
-  Widget _buildEmergencyButton(
-    IconData icon, 
-    String label, 
-    String number, 
-    Color color, 
-    VoidCallback onPressed
-  ) {
+
+  Widget _buildEmergencyButton(IconData icon, String label, String number,
+      Color color, VoidCallback onPressed) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -939,15 +950,25 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   String _formatDate(DateTime? date) {
     if (date == null) return 'Unknown';
-    
+
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
     ];
-    
+
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 }

@@ -1,9 +1,9 @@
-import 'package:corider/cloud_functions/firebase_function.dart';
-import 'package:corider/models/ride_offer_model.dart';
-import 'package:corider/models/types/requested_offer_status.dart';
-import 'package:corider/models/vehicle_model.dart';
-import 'package:corider/providers/user_state.dart';
-import 'package:corider/utils/utils.dart';
+import 'package:rideshare/cloud_functions/firebase_function.dart';
+import 'package:rideshare/models/ride_offer_model.dart';
+import 'package:rideshare/models/types/requested_offer_status.dart';
+import 'package:rideshare/models/vehicle_model.dart';
+import 'package:rideshare/providers/user_state.dart';
+import 'package:rideshare/utils/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
@@ -39,11 +39,20 @@ class UserModel {
       firstName: json['firstName'],
       lastName: json['lastName'],
       profileImage: json['profileImage'],
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
-      vehicle: json['vehicle'] != null ? VehicleModel.fromJson(json['vehicle']) : null,
-      myOfferIds: json['myOfferIds'] != null ? List<String>.from(json['myOfferIds']) : [],
-      requestedOfferIds: json['requestedOfferIds'] != null ? List<String>.from(json['requestedOfferIds']) : [],
-      chatRoomIds: json['chatRoomIds'] != null ? List<String>.from(json['chatRoomIds']) : [],
+      createdAt:
+          json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
+      vehicle: json['vehicle'] != null
+          ? VehicleModel.fromJson(json['vehicle'])
+          : null,
+      myOfferIds: json['myOfferIds'] != null
+          ? List<String>.from(json['myOfferIds'])
+          : [],
+      requestedOfferIds: json['requestedOfferIds'] != null
+          ? List<String>.from(json['requestedOfferIds'])
+          : [],
+      chatRoomIds: json['chatRoomIds'] != null
+          ? List<String>.from(json['chatRoomIds'])
+          : [],
       showFullName: json['showFullName'] ?? true,
     );
   }
@@ -80,7 +89,8 @@ class UserModel {
   }
 
   //#region User Intents
-  Future<String?> createRideOffer(UserState userState, RideOfferModel offer) async {
+  Future<String?> createRideOffer(
+      UserState userState, RideOfferModel offer) async {
     final err = await FirebaseFunctions.saveRideOfferByUser(this, offer);
     if (err == null) {
       myOfferIds.add(offer.id);
@@ -124,7 +134,8 @@ class UserModel {
     }
   }
 
-  Future<String?> requestRide(UserState userState, RideOfferModel rideOffer) async {
+  Future<String?> requestRide(
+      UserState userState, RideOfferModel rideOffer) async {
     final err = await FirebaseFunctions.requestRideByRideOffer(this, rideOffer);
     if (err == null) {
       requestedOfferIds.add(rideOffer.id);
@@ -135,8 +146,10 @@ class UserModel {
     }
   }
 
-  Future<String?> withdrawRequestRide(UserState userState, String rideOfferId) async {
-    final err = await FirebaseFunctions.removeRideRequestByRideOfferId(this, rideOfferId);
+  Future<String?> withdrawRequestRide(
+      UserState userState, String rideOfferId) async {
+    final err = await FirebaseFunctions.removeRideRequestByRideOfferId(
+        this, rideOfferId);
     if (err == null) {
       requestedOfferIds.remove(rideOfferId);
       userState.setCurrentUser(this);
@@ -146,17 +159,20 @@ class UserModel {
     }
   }
 
-  Future<types.Room?> requestChatWithUser(UserState userState, UserModel otherUser) async {
+  Future<types.Room?> requestChatWithUser(
+      UserState userState, UserModel otherUser) async {
     try {
       String? roomId = Utils.getRoomIdByTwoUser(email, otherUser.email);
       if (!chatRoomIds.contains(roomId)) {
-        roomId = await FirebaseFunctions.requestChatWithUser(userState, this, otherUser);
+        roomId = await FirebaseFunctions.requestChatWithUser(
+            userState, this, otherUser);
       }
       if (roomId != null) {
         if (!chatRoomIds.contains(roomId)) {
           chatRoomIds.add(roomId);
         }
-        return await userState.getStoredChatRoomByRoomId(roomId, forceUpdate: true);
+        return await userState.getStoredChatRoomByRoomId(roomId,
+            forceUpdate: true);
       } else {
         return null;
       }
@@ -187,4 +203,3 @@ class UserModel {
   }
   //#endregion
 }
-

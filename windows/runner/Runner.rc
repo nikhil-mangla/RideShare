@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "corider" "\0"
+            VALUE "FileDescription", "rideshare" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "corider" "\0"
+            VALUE "InternalName", "rideshare" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2023 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "corider.exe" "\0"
-            VALUE "ProductName", "corider" "\0"
+            VALUE "OriginalFilename", "rideshare.exe" "\0"
+            VALUE "ProductName", "rideshare" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

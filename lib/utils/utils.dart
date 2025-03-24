@@ -1,5 +1,5 @@
-import 'package:corider/models/types/requested_offer_status.dart';
-import 'package:corider/models/user_model.dart';
+import 'package:rideshare/models/types/requested_offer_status.dart';
+import 'package:rideshare/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:geolocator/geolocator.dart';
@@ -32,7 +32,8 @@ class Utils {
       case 'Pink':
         return Colors.pink;
       default:
-        return Colors.transparent; // Return a default color if the value doesn't match any case
+        return Colors
+            .transparent; // Return a default color if the value doesn't match any case
     }
   }
 
@@ -64,7 +65,8 @@ class Utils {
     return users.join('_');
   }
 
-  static types.Room displayedDirectRoomInfo(types.Room room, UserModel otherUser) {
+  static types.Room displayedDirectRoomInfo(
+      types.Room room, UserModel otherUser) {
     if (room.type != types.RoomType.direct) {
       return room;
     }
@@ -119,8 +121,8 @@ class Utils {
   }
 
   static String getDistanceByTwoLocation(LatLng location1, LatLng location2) {
-    double distance =
-        Geolocator.distanceBetween(location1.latitude, location1.longitude, location2.latitude, location2.longitude);
+    double distance = Geolocator.distanceBetween(location1.latitude,
+        location1.longitude, location2.latitude, location2.longitude);
     return '${(distance / 1000).toStringAsFixed(2)} km';
   }
 }

@@ -1,7 +1,7 @@
-import 'package:corider/cloud_functions/firebase_function.dart';
-import 'package:corider/providers/user_state.dart';
-import 'package:corider/screens/login/custom_route.dart';
-import 'package:corider/screens/onboarding_screen.dart';
+import 'package:rideshare/cloud_functions/firebase_function.dart';
+import 'package:rideshare/providers/user_state.dart';
+import 'package:rideshare/screens/login/custom_route.dart';
+import 'package:rideshare/screens/onboarding_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import '../root.dart';
@@ -46,7 +46,7 @@ class LoginScreen extends StatelessWidget {
                 fontSize: 24.0,
               ),
               primaryColor: const Color(0xFF6A4C93),
-              accentColor: const Color(0xFF8A70B8), 
+              accentColor: const Color(0xFF8A70B8),
               // Key fix for half screen issue - use proper page colors
               pageColorLight: const Color(0xFF6A4C93),
               pageColorDark: const Color(0xFF4A2C73),

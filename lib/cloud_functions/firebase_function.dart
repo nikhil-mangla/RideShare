@@ -1,12 +1,12 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:corider/models/ride_offer_model.dart';
-import 'package:corider/models/types/requested_offer_status.dart';
-import 'package:corider/models/user_model.dart';
-import 'package:corider/models/vehicle_model.dart';
-import 'package:corider/providers/user_state.dart';
-import 'package:corider/utils/utils.dart';
+import 'package:rideshare/models/ride_offer_model.dart';
+import 'package:rideshare/models/types/requested_offer_status.dart';
+import 'package:rideshare/models/user_model.dart';
+import 'package:rideshare/models/vehicle_model.dart';
+import 'package:rideshare/providers/user_state.dart';
+import 'package:rideshare/utils/utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -620,7 +620,6 @@ class FirebaseFunctions {
           .doc(user.companyName)
           .collection('rideOffers');
 
-      
       final userDocRef = firestore.collection('users').doc(user.email);
       final userSnapshot = await userDocRef.get();
       if (!userSnapshot.exists) {
@@ -638,7 +637,6 @@ class FirebaseFunctions {
           .where('driverId', isEqualTo: user.email)
           .get();
 
-      
       WriteBatch batch = firestore.batch();
       batch.delete(userDocRef);
 
@@ -650,7 +648,6 @@ class FirebaseFunctions {
         batch.delete(rideOfferDoc.reference);
       }
 
-     
       for (final offerId in requestedOfferIds) {
         final rideOfferRef = rideOffersCollection.doc(offerId);
         batch.update(rideOfferRef, {
@@ -660,17 +657,14 @@ class FirebaseFunctions {
 
       await batch.commit();
 
-      
       try {
         final storageRef =
             storage.ref().child('profile_images/${user.email}.jpg');
         await storageRef.delete();
       } catch (e) {
         debugPrint("Error deleting profile image: ${e.toString()}");
-        
       }
 
-      
       User? currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser != null && currentUser.email == user.email) {
         await currentUser.delete();

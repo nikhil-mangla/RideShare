@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:corider/cloud_functions/firebase_function.dart';
-import 'package:corider/models/ride_offer_model.dart';
-import 'package:corider/models/user_model.dart';
+import 'package:rideshare/cloud_functions/firebase_function.dart';
+import 'package:rideshare/models/ride_offer_model.dart';
+import 'package:rideshare/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -28,8 +28,8 @@ class UserState extends ChangeNotifier {
   Map<String, UserModel> get storedUsers => _storedUsers;
   Map<String, types.Room> get storedChatRooms => _storedChatRooms;
   Map<String, int> get totalNotifications => _totalNotifications;
-  int get totalNotificationsCount =>
-      _totalNotifications.values.fold(0, (previousValue, element) => previousValue + element);
+  int get totalNotificationsCount => _totalNotifications.values
+      .fold(0, (previousValue, element) => previousValue + element);
 
   Future<void> setCurrentLocation(LatLng newLocation) async {
     _currentLocation = newLocation;
@@ -37,99 +37,105 @@ class UserState extends ChangeNotifier {
   }
 
   // Add this function to your UserState class (in user_state.dart)
-Future<Position?> getCurrentLocationWithPermissionHandling() async {
-  bool serviceEnabled;
-  LocationPermission permission;
+  Future<Position?> getCurrentLocationWithPermissionHandling() async {
+    bool serviceEnabled;
+    LocationPermission permission;
 
-  // Test if location services are enabled.
-  serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  if (!serviceEnabled) {
-    // Location services are not enabled, show dialog to enable
-    return Future.error('Location services are disabled.');
-  }
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled, show dialog to enable
+      return Future.error('Location services are disabled.');
+    }
 
-  permission = await Geolocator.checkPermission();
-  if (permission == LocationPermission.denied) {
-    permission = await Geolocator.requestPermission();
+    permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
-      // Permissions are denied, show a dialog with explanation
-      return Future.error('Location permissions are denied');
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, show a dialog with explanation
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    // When we reach here, permissions are granted and we can
+    // continue accessing the position of the device.
+    try {
+      Position position = await Geolocator.getCurrentPosition();
+      return position;
+    } catch (e) {
+      return Future.error('Error getting location: $e');
     }
   }
-  
-  if (permission == LocationPermission.deniedForever) {
-    // Permissions are denied forever, handle appropriately.
-    return Future.error(
-      'Location permissions are permanently denied, we cannot request permissions.');
-  } 
-
-  // When we reach here, permissions are granted and we can
-  // continue accessing the position of the device.
-  try {
-    Position position = await Geolocator.getCurrentPosition();
-    return position;
-  } catch (e) {
-    return Future.error('Error getting location: $e');
-  }
-}
 
 // Add this method to display a permission explanation dialog
-Future<void> showLocationPermissionDialog(BuildContext context) async {
-  return showDialog<void>(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Location Permission Required'),
-        content: SingleChildScrollView(
-          child: ListBody(
-            children: const <Widget>[
-              Text('This app needs access to your location to show nearby rides.'),
-              Text('Please grant location permission in your device settings.'),
-            ],
+  Future<void> showLocationPermissionDialog(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Location Permission Required'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: const <Widget>[
+                Text(
+                    'This app needs access to your location to show nearby rides.'),
+                Text(
+                    'Please grant location permission in your device settings.'),
+              ],
+            ),
           ),
-        ),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('Cancel'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          TextButton(
-            child: const Text('Open Settings'),
-            onPressed: () {
-              Navigator.of(context).pop();
-              Geolocator.openAppSettings();
-              // or Geolocator.openLocationSettings(); to open location settings
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Open Settings'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Geolocator.openAppSettings();
+                // or Geolocator.openLocationSettings(); to open location settings
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-  Future<void> setTotalNotifications(Map<String, int> newTotalNotifications) async {
+  Future<void> setTotalNotifications(
+      Map<String, int> newTotalNotifications) async {
     _totalNotifications = newTotalNotifications;
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setString(_totalNotificationsKey, jsonEncode(_totalNotifications));
+    sharedPreferences.setString(
+        _totalNotificationsKey, jsonEncode(_totalNotifications));
     notifyListeners();
   }
 
   Future<List<types.Room>> fetchAllChatRooms() async {
     List<types.Room> allChatRooms = [];
     try {
-      allChatRooms = await FirebaseFunctions.fetchAllChatRooms(this, currentUser!);
+      allChatRooms =
+          await FirebaseFunctions.fetchAllChatRooms(this, currentUser!);
       Map<String, int> newTotalNotifications = {};
       for (final chatRoom in allChatRooms) {
         final previousNotifications = _totalNotifications[chatRoom.id] ?? 0;
-        int newNotifications =
-            chatRoom.lastMessages!.length - (_storedChatRooms[chatRoom.id]?.lastMessages?.length ?? 0);
+        int newNotifications = chatRoom.lastMessages!.length -
+            (_storedChatRooms[chatRoom.id]?.lastMessages?.length ?? 0);
         if (newNotifications < 0) {
           newNotifications = 0;
         }
-        newTotalNotifications[chatRoom.id] = previousNotifications + newNotifications;
+        newTotalNotifications[chatRoom.id] =
+            previousNotifications + newNotifications;
       }
       await setTotalNotifications(newTotalNotifications);
     } catch (e) {
@@ -166,83 +172,108 @@ Future<void> showLocationPermissionDialog(BuildContext context) async {
   }
 
   Future<void> setStoredOffer(String offerId, RideOfferModel? offer) async {
-    if (offer != null && (!_storedOffers.containsKey(offer.id) || _storedOffers[offer.id] != offer)) {
+    if (offer != null &&
+        (!_storedOffers.containsKey(offer.id) ||
+            _storedOffers[offer.id] != offer)) {
       _storedOffers[offerId] = offer;
-      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+      SharedPreferences sharedPreferences =
+          await SharedPreferences.getInstance();
       sharedPreferences.setString(_storedOffersKey, jsonEncode(_storedOffers));
       notifyListeners();
     } else if (offer == null && _storedOffers.containsKey(offerId)) {
       _storedOffers.remove(offerId);
-      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+      SharedPreferences sharedPreferences =
+          await SharedPreferences.getInstance();
       sharedPreferences.setString(_storedOffersKey, jsonEncode(_storedOffers));
       notifyListeners();
     }
   }
 
   Future<void> setStoredUser(String userId, UserModel? user) async {
-    if (user != null && (!_storedUsers.containsKey(user.email) || _storedUsers[user.email] != user)) {
+    if (user != null &&
+        (!_storedUsers.containsKey(user.email) ||
+            _storedUsers[user.email] != user)) {
       _storedUsers[user.email] = user;
-      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+      SharedPreferences sharedPreferences =
+          await SharedPreferences.getInstance();
       sharedPreferences.setString(_storedUsersKey, jsonEncode(_storedUsers));
       notifyListeners();
     } else if (user == null && _storedUsers.containsKey(userId)) {
       _storedUsers.remove(userId);
-      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+      SharedPreferences sharedPreferences =
+          await SharedPreferences.getInstance();
       sharedPreferences.setString(_storedUsersKey, jsonEncode(_storedUsers));
       notifyListeners();
     }
   }
 
   Future<void> setAllStoredChatRooms(List<types.Room> chatRooms) async {
-    _storedChatRooms = {for (final chatRoom in chatRooms) chatRoom.id: chatRoom};
+    _storedChatRooms = {
+      for (final chatRoom in chatRooms) chatRoom.id: chatRoom
+    };
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setString(_storedChatRoomsKey, jsonEncode(_storedChatRooms));
+    sharedPreferences.setString(
+        _storedChatRoomsKey, jsonEncode(_storedChatRooms));
     notifyListeners();
   }
 
-  Future<void> setStoredChatRoom(String chatRoomId, types.Room? chatRoom) async {
-    if (chatRoom != null && (!_storedChatRooms.containsKey(chatRoom.id) || _storedChatRooms[chatRoom.id] != chatRoom)) {
+  Future<void> setStoredChatRoom(
+      String chatRoomId, types.Room? chatRoom) async {
+    if (chatRoom != null &&
+        (!_storedChatRooms.containsKey(chatRoom.id) ||
+            _storedChatRooms[chatRoom.id] != chatRoom)) {
       _storedChatRooms[chatRoom.id] = chatRoom;
-      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-      sharedPreferences.setString(_storedChatRoomsKey, jsonEncode(_storedChatRooms));
+      SharedPreferences sharedPreferences =
+          await SharedPreferences.getInstance();
+      sharedPreferences.setString(
+          _storedChatRoomsKey, jsonEncode(_storedChatRooms));
       notifyListeners();
     } else if (chatRoom == null && _storedChatRooms.containsKey(chatRoomId)) {
       _storedChatRooms.remove(chatRoomId);
-      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-      sharedPreferences.setString(_storedChatRoomsKey, jsonEncode(_storedChatRooms));
+      SharedPreferences sharedPreferences =
+          await SharedPreferences.getInstance();
+      sharedPreferences.setString(
+          _storedChatRoomsKey, jsonEncode(_storedChatRooms));
       notifyListeners();
     }
   }
 
-  Future<RideOfferModel?> getStoredOfferById(String id, {bool forceUpdate = false}) async {
+  Future<RideOfferModel?> getStoredOfferById(String id,
+      {bool forceUpdate = false}) async {
     RideOfferModel? storedOffer;
     if (_storedOffers.containsKey(id) && !forceUpdate) {
       storedOffer = _storedOffers[id];
-      FirebaseFunctions.fetchRideOfferById(currentUser!, id).then((fetchedOffer) {
+      FirebaseFunctions.fetchRideOfferById(currentUser!, id)
+          .then((fetchedOffer) {
         setStoredOffer(id, fetchedOffer);
       });
       return storedOffer;
     }
-    final fetchedOffer = await FirebaseFunctions.fetchRideOfferById(currentUser!, id);
+    final fetchedOffer =
+        await FirebaseFunctions.fetchRideOfferById(currentUser!, id);
     setStoredOffer(id, fetchedOffer);
     return fetchedOffer;
   }
 
-  Future<types.Room?> getStoredChatRoomByRoomId(String roomId, {bool forceUpdate = false}) async {
+  Future<types.Room?> getStoredChatRoomByRoomId(String roomId,
+      {bool forceUpdate = false}) async {
     types.Room? storedChatRoom;
     if (_storedChatRooms.containsKey(roomId) && !forceUpdate) {
       storedChatRoom = _storedChatRooms[roomId];
-      FirebaseFunctions.fetchChatRoom(this, currentUser!, roomId).then((fetchedChatRoom) {
+      FirebaseFunctions.fetchChatRoom(this, currentUser!, roomId)
+          .then((fetchedChatRoom) {
         setStoredChatRoom(roomId, fetchedChatRoom);
       });
       return storedChatRoom;
     }
-    final fetchedChatRoom = await FirebaseFunctions.fetchChatRoom(this, currentUser!, roomId);
+    final fetchedChatRoom =
+        await FirebaseFunctions.fetchChatRoom(this, currentUser!, roomId);
     setStoredChatRoom(roomId, fetchedChatRoom);
     return fetchedChatRoom;
   }
 
-  Future<UserModel?> getStoredUserByEmail(String email, {bool forceUpdate = false}) async {
+  Future<UserModel?> getStoredUserByEmail(String email,
+      {bool forceUpdate = false}) async {
     UserModel? storedUser;
     if (_storedUsers.containsKey(email) && !forceUpdate) {
       storedUser = storedUsers[email];
@@ -285,7 +316,8 @@ Future<void> showLocationPermissionDialog(BuildContext context) async {
           // compare currentUser with user
           if (jsonEncode(currentUser!.toJson()) != jsonEncode(user!.toJson())) {
             // print different
-            debugPrint('difference: ${jsonEncode(currentUser!.toJson())} != ${jsonEncode(user.toJson())}');
+            debugPrint(
+                'difference: ${jsonEncode(currentUser!.toJson())} != ${jsonEncode(user.toJson())}');
             // if different, update currentUser
             setCurrentUser(user);
           }
@@ -297,8 +329,10 @@ Future<void> showLocationPermissionDialog(BuildContext context) async {
         // get stored offers
         if (storedOffersString != null) {
           try {
-            _storedOffers = (jsonDecode(storedOffersString) as Map<String, dynamic>)
-                .map((key, value) => MapEntry(key, RideOfferModel.fromJson(value)));
+            _storedOffers =
+                (jsonDecode(storedOffersString) as Map<String, dynamic>).map(
+                    (key, value) =>
+                        MapEntry(key, RideOfferModel.fromJson(value)));
             debugPrint('storedOffers: ${_storedOffers.toString()}');
           } catch (e) {
             debugPrint('Error parsing currentOfferString: $e');
@@ -313,7 +347,8 @@ Future<void> showLocationPermissionDialog(BuildContext context) async {
         // get stored users
         if (storedUsersString != null) {
           try {
-            _storedUsers = (jsonDecode(storedUsersString) as Map<String, dynamic>)
+            _storedUsers = (jsonDecode(storedUsersString)
+                    as Map<String, dynamic>)
                 .map((key, value) => MapEntry(key, UserModel.fromJson(value)));
             debugPrint('storedUsers: ${_storedUsers.toString()}');
           } catch (e) {
@@ -324,7 +359,8 @@ Future<void> showLocationPermissionDialog(BuildContext context) async {
         // get stored chatRooms
         if (storedChatRoomsString != null) {
           try {
-            _storedChatRooms = (jsonDecode(storedChatRoomsString) as Map<String, dynamic>)
+            _storedChatRooms = (jsonDecode(storedChatRoomsString)
+                    as Map<String, dynamic>)
                 .map((key, value) => MapEntry(key, types.Room.fromJson(value)));
             debugPrint('storedChatRooms: ${_storedChatRooms.toString()}');
           } catch (e) {
@@ -332,7 +368,8 @@ Future<void> showLocationPermissionDialog(BuildContext context) async {
           }
         } else {
           // fetch chatRooms from firebase
-          FirebaseFunctions.fetchAllChatRooms(this, currentUser!).then((chatRooms) {
+          FirebaseFunctions.fetchAllChatRooms(this, currentUser!)
+              .then((chatRooms) {
             setAllStoredChatRooms(chatRooms);
           });
         }

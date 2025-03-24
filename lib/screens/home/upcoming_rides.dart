@@ -1,25 +1,30 @@
-import 'package:corider/models/types/requested_offer_status.dart';
-import 'package:corider/providers/user_state.dart';
-import 'package:corider/screens/ride/exploreRides/ride_offer_detail_screen.dart';
-import 'package:corider/utils/utils.dart';
+import 'package:rideshare/models/types/requested_offer_status.dart';
+import 'package:rideshare/providers/user_state.dart';
+import 'package:rideshare/screens/ride/exploreRides/ride_offer_detail_screen.dart';
+import 'package:rideshare/utils/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:corider/models/ride_offer_model.dart';
-import 'package:corider/models/user_model.dart';
+import 'package:rideshare/models/ride_offer_model.dart';
+import 'package:rideshare/models/user_model.dart';
 
 class UpcomingRides extends StatefulWidget {
   final UserState userState;
   final Function() fetchAllOffers;
   final Function(int) changePageIndex;
 
-  const UpcomingRides({super.key, required this.userState, required this.fetchAllOffers, required this.changePageIndex});
+  const UpcomingRides(
+      {super.key,
+      required this.userState,
+      required this.fetchAllOffers,
+      required this.changePageIndex});
 
   @override
   UpcomingRidesState createState() => UpcomingRidesState();
 }
 
 class UpcomingRidesState extends State<UpcomingRides> {
-  GlobalKey<RefreshIndicatorState> refreshMyRequestedOfferIndicatorKey = GlobalKey<RefreshIndicatorState>();
+  GlobalKey<RefreshIndicatorState> refreshMyRequestedOfferIndicatorKey =
+      GlobalKey<RefreshIndicatorState>();
   List<RideOfferModel> myRequestedOffers = [];
   Map<String, UserModel?> drivers = {};
 
@@ -29,19 +34,20 @@ class UpcomingRidesState extends State<UpcomingRides> {
 
   void getMyRequestedOffers() {
     final requestedOffers = widget.userState.storedOffers.entries
-        .where((offer) => widget.userState.currentUser!.requestedOfferIds.contains(offer.key))
+        .where((offer) =>
+            widget.userState.currentUser!.requestedOfferIds.contains(offer.key))
         .map((offer) => offer.value)
         .toList();
     setState(() {
       myRequestedOffers = requestedOffers;
     });
-    
+
     // Fetch driver information for each offer
     for (var offer in requestedOffers) {
       getDriverInfo(offer.driverId);
     }
   }
-  
+
   Future<void> getDriverInfo(String driverId) async {
     if (driverId == widget.userState.currentUser!.email) {
       setState(() {
@@ -56,7 +62,7 @@ class UpcomingRidesState extends State<UpcomingRides> {
     } else {
       fetchedDriver = await widget.userState.getStoredUserByEmail(driverId);
     }
-    
+
     setState(() {
       drivers[driverId] = fetchedDriver;
     });
@@ -72,11 +78,11 @@ class UpcomingRidesState extends State<UpcomingRides> {
     if (driverId == widget.userState.currentUser!.email) {
       return 'You';
     }
-    
+
     if (drivers.containsKey(driverId) && drivers[driverId] != null) {
       return drivers[driverId]!.fullName;
     }
-    
+
     return 'Loading...';
   }
 
@@ -117,7 +123,8 @@ class UpcomingRidesState extends State<UpcomingRides> {
         itemCount: myRequestedOffers.length,
         itemBuilder: (context, index) {
           final rideOffer = myRequestedOffers[index];
-          final requestedOfferStatus = rideOffer.requestedUserIds[widget.userState.currentUser!.email]!;
+          final requestedOfferStatus =
+              rideOffer.requestedUserIds[widget.userState.currentUser!.email]!;
 
           if (requestedOfferStatus == RequestedOfferStatus.INVALID) {
             return ListTile(
@@ -125,7 +132,8 @@ class UpcomingRidesState extends State<UpcomingRides> {
               subtitle: const Text('This offer is deleted by the user.'),
               trailing: const Icon(Icons.error, color: Colors.orange),
               onTap: () {
-                widget.userState.currentUser!.withdrawRequestRide(widget.userState, rideOffer.id);
+                widget.userState.currentUser!
+                    .withdrawRequestRide(widget.userState, rideOffer.id);
               },
             );
           }
