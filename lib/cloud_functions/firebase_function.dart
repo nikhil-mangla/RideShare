@@ -14,10 +14,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_login/flutter_login.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
-
-
 class FirebaseFunctions {
-  static Future<void> updateNameVisibility(UserModel user, bool isVisible) async {
+  static Future<void> updateNameVisibility(
+      UserModel user, bool isVisible) async {
     try {
       await FirebaseFirestore.instance
           .collection('users')
@@ -28,8 +27,8 @@ class FirebaseFunctions {
     }
   }
 
-  static Future<String?> changeRideRequestStatusWithUserId(
-      UserModel user, String rideOfferId, String userId, RequestedOfferStatus status) async {
+  static Future<String?> changeRideRequestStatusWithUserId(UserModel user,
+      String rideOfferId, String userId, RequestedOfferStatus status) async {
     try {
       final rideOfferRef = FirebaseFirestore.instance
           .collection("companies")
@@ -65,7 +64,8 @@ class FirebaseFunctions {
     return null;
   }
 
-  static Future<String?> requestChatWithUser(UserState userState, UserModel user, UserModel otherUser) async {
+  static Future<String?> requestChatWithUser(
+      UserState userState, UserModel user, UserModel otherUser) async {
     String? chatRoomId;
     try {
       final potentialChatRoom = types.Room(
@@ -85,7 +85,10 @@ class FirebaseFunctions {
         FirebaseFirestore.instance.collection("users").doc(user.email).update({
           'chatRoomIds': FieldValue.arrayUnion([potentialChatRoom.id])
         }),
-        FirebaseFirestore.instance.collection("users").doc(otherUser.email).update({
+        FirebaseFirestore.instance
+            .collection("users")
+            .doc(otherUser.email)
+            .update({
           'chatRoomIds': FieldValue.arrayUnion([potentialChatRoom.id])
         })
       ]);
@@ -96,7 +99,8 @@ class FirebaseFunctions {
     return chatRoomId;
   }
 
-  static Future<types.Room?> fetchChatRoom(UserState userState, UserModel currentUser, String roomId) async {
+  static Future<types.Room?> fetchChatRoom(
+      UserState userState, UserModel currentUser, String roomId) async {
     types.Room? chatRoom;
     try {
       final chatRoomDoc = await FirebaseFirestore.instance
@@ -117,15 +121,19 @@ class FirebaseFunctions {
             .get();
         if (messagesSnapshot.docs.isNotEmpty) {
           List<types.Message> lastMessages = List<types.Message>.from(
-              messagesSnapshot.docs.map((messageDoc) => types.Message.fromJson(messageDoc.data())));
+              messagesSnapshot.docs.map(
+                  (messageDoc) => types.Message.fromJson(messageDoc.data())));
           await Future.forEach(lastMessages.asMap().entries, (entry) async {
             final index = entry.key;
             final message = entry.value;
 
-            final getUser = await userState.getStoredUserByEmail(message.author.id);
+            final getUser =
+                await userState.getStoredUserByEmail(message.author.id);
             lastMessages[index] = message.copyWith(
                 author: getUser?.toChatUser(),
-                status: getUser?.email == currentUser.email ? types.Status.sent : types.Status.seen);
+                status: getUser?.email == currentUser.email
+                    ? types.Status.sent
+                    : types.Status.seen);
           });
 
           chatRoom = chatRoom.copyWith(
@@ -134,8 +142,10 @@ class FirebaseFunctions {
         }
 
         if (chatRoom.type == types.RoomType.direct) {
-          final otherUser = chatRoom.users.firstWhere((user) => user.id != currentUser.email);
-          final getOtherUser = await userState.getStoredUserByEmail(otherUser.id);
+          final otherUser =
+              chatRoom.users.firstWhere((user) => user.id != currentUser.email);
+          final getOtherUser =
+              await userState.getStoredUserByEmail(otherUser.id);
           chatRoom = chatRoom.copyWith(
             imageUrl: getOtherUser?.profileImage,
             name: getOtherUser?.fullName ?? otherUser.id,
@@ -158,7 +168,8 @@ class FirebaseFunctions {
     return chatRoom;
   }
 
-  static Future<List<types.Room>> fetchAllChatRooms(UserState userState, UserModel user) async {
+  static Future<List<types.Room>> fetchAllChatRooms(
+      UserState userState, UserModel user) async {
     List<types.Room> chatRooms = [];
     try {
       await Future.wait(user.chatRoomIds.map((chatRoomId) async {
@@ -173,7 +184,8 @@ class FirebaseFunctions {
     return chatRooms;
   }
 
-  static Future<RideOfferModel?> fetchRideOfferById(UserModel user, String offerId) async {
+  static Future<RideOfferModel?> fetchRideOfferById(
+      UserModel user, String offerId) async {
     try {
       final offerDoc = await FirebaseFirestore.instance
           .collection("companies")
@@ -194,7 +206,8 @@ class FirebaseFunctions {
     }
   }
 
-  static Future<List<RideOfferModel>> fetchUserOffersbyUser(UserModel user) async {
+  static Future<List<RideOfferModel>> fetchUserOffersbyUser(
+      UserModel user) async {
     try {
       final offersCollection = FirebaseFirestore.instance
           .collection("companies")
@@ -205,7 +218,9 @@ class FirebaseFunctions {
       final offersSnapshot = await offersCollection.get();
 
       if (offersSnapshot.docs.isNotEmpty) {
-        final offers = offersSnapshot.docs.map((offer) => RideOfferModel.fromJson(offer.data())).toList();
+        final offers = offersSnapshot.docs
+            .map((offer) => RideOfferModel.fromJson(offer.data()))
+            .toList();
         return offers;
       } else {
         return [];
@@ -219,7 +234,8 @@ class FirebaseFunctions {
   static Future<String?> getProfileImageUrlByUser(UserModel user) async {
     try {
       final storage = firebase_storage.FirebaseStorage.instance;
-      final storageRef = storage.ref().child('profile_images/${user.email}.jpg');
+      final storageRef =
+          storage.ref().child('profile_images/${user.email}.jpg');
       return await storageRef.getDownloadURL();
     } catch (e) {
       debugPrint(e.toString());
@@ -227,10 +243,12 @@ class FirebaseFunctions {
     }
   }
 
-  static Future<String?> uploadProfileImageByUser(UserModel user, File imageFile) async {
+  static Future<String?> uploadProfileImageByUser(
+      UserModel user, File imageFile) async {
     try {
       final storage = firebase_storage.FirebaseStorage.instance;
-      final storageRef = storage.ref().child('profile_images/${user.email}.jpg');
+      final storageRef =
+          storage.ref().child('profile_images/${user.email}.jpg');
       // Upload the image file to Firebase Storage
       await storageRef.putFile(imageFile);
       return null;
@@ -239,9 +257,13 @@ class FirebaseFunctions {
     }
   }
 
-  static Future<String?> saveProfileImageByUser(UserModel user, String profileImageUrl) async {
+  static Future<String?> saveProfileImageByUser(
+      UserModel user, String profileImageUrl) async {
     try {
-      await FirebaseFirestore.instance.collection('users').doc(user.email).update({
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.email)
+          .update({
         'profileImage': profileImageUrl,
       });
       return null;
@@ -250,7 +272,8 @@ class FirebaseFunctions {
     }
   }
 
-  static Future<String?> saveRideOfferByUser(UserModel user, RideOfferModel offer) async {
+  static Future<String?> saveRideOfferByUser(
+      UserModel user, RideOfferModel offer) async {
     try {
       await FirebaseFirestore.instance
           .collection('companies')
@@ -258,7 +281,10 @@ class FirebaseFunctions {
           .collection('rideOffers')
           .doc(offer.id)
           .set(offer.toJson());
-      await FirebaseFirestore.instance.collection('users').doc(user.email).update({
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.email)
+          .update({
         'myOfferIds': FieldValue.arrayUnion([offer.id]),
       });
       return null;
@@ -267,7 +293,8 @@ class FirebaseFunctions {
     }
   }
 
-  static Future<String?> requestRideByRideOffer(UserModel user, RideOfferModel rideOffer) async {
+  static Future<String?> requestRideByRideOffer(
+      UserModel user, RideOfferModel rideOffer) async {
     try {
       await FirebaseFirestore.instance
           .collection('companies')
@@ -277,7 +304,10 @@ class FirebaseFunctions {
           .set({
         'requestedUserIds': {user.email: RequestedOfferStatus.PENDING.index},
       }, SetOptions(merge: true));
-      await FirebaseFirestore.instance.collection('users').doc(user.email).update({
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.email)
+          .update({
         'requestedOfferIds': FieldValue.arrayUnion([rideOffer.id]),
       });
       // notify driver
@@ -299,11 +329,13 @@ class FirebaseFunctions {
     }
   }
 
-  static Future<String?> removeRideRequestByRideOfferId(UserModel user, String rideOfferId) async {
+  static Future<String?> removeRideRequestByRideOfferId(
+      UserModel user, String rideOfferId) async {
     try {
-      // Order is critical here
-      // Because rideOffer might be deleted before user removes request
-      await FirebaseFirestore.instance.collection('users').doc(user.email).update({
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.email)
+          .update({
         'requestedOfferIds': FieldValue.arrayRemove([rideOfferId]),
       });
       await FirebaseFirestore.instance
@@ -323,18 +355,22 @@ class FirebaseFunctions {
   static Future<String?> deleteVehicleByUser(UserModel user) async {
     try {
       user.vehicle = null;
-      await FirebaseFirestore.instance.collection('users').doc(user.email).update({'vehicle': FieldValue.delete()});
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.email)
+          .update({'vehicle': FieldValue.delete()});
       return null;
     } catch (e) {
       return e.toString();
     }
   }
 
-  static Future<String?> saveVehicleByUser(UserModel user, VehicleModel vehicle) async {
+  static Future<String?> saveVehicleByUser(
+      UserModel user, VehicleModel vehicle) async {
     try {
-      await FirebaseFirestore.instance.collection('users').doc(user.email).update({
+      await FirebaseFirestore.instance.collection('users').doc(user.email).set({
         'vehicle': vehicle.toJson(),
-      });
+      }, SetOptions(merge: true));
       return null;
     } on FirebaseException catch (e) {
       return e.message;
@@ -364,15 +400,46 @@ class FirebaseFunctions {
     }
   }
 
-  static Future<String?> deleteUserRideOfferByOfferId(UserModel user, String offerId) async {
+  static Future<String?> deleteUserRideOfferByOfferId(
+      UserModel user, String offerId) async {
     try {
-      final offersCollection =
-          FirebaseFirestore.instance.collection("companies").doc(user.companyName).collection("rideOffers");
-      offersCollection.doc(offerId).delete();
+      final offersCollection = FirebaseFirestore.instance
+          .collection("companies")
+          .doc(user.companyName)
+          .collection("rideOffers");
 
-      await FirebaseFirestore.instance.collection('users').doc(user.email).update({
+      final offerDoc = await offersCollection.doc(offerId).get();
+
+      if (!offerDoc.exists) {
+        return "Ride offer does not exist.";
+      }
+
+      final offerData = offerDoc.data();
+      if (offerData == null || !offerData.containsKey('requestedUserIds')) {
+        return "No requested users found for this ride.";
+      }
+
+      final List<String> requestedUsers =
+          (offerData['requestedUserIds'] as Map<String, dynamic>).keys.toList();
+
+      for (String userEmail in requestedUsers) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userEmail)
+            .update({
+          'requestedOfferIds': FieldValue.arrayRemove([offerId]),
+        });
+      }
+
+      await offersCollection.doc(offerId).delete();
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.email)
+          .update({
         'myOfferIds': FieldValue.arrayRemove([offerId]),
       });
+
       return null;
     } catch (e) {
       debugPrint(e.toString());
@@ -380,13 +447,18 @@ class FirebaseFunctions {
     }
   }
 
-  static Future<List<RideOfferModel>> fetchAllOffersbyUser(UserModel user) async {
+  static Future<List<RideOfferModel>> fetchAllOffersbyUser(
+      UserModel user) async {
     try {
-      final offersCollection =
-          FirebaseFirestore.instance.collection("companies").doc(user.companyName).collection("rideOffers");
+      final offersCollection = FirebaseFirestore.instance
+          .collection("companies")
+          .doc(user.companyName)
+          .collection("rideOffers");
 
       final offersSnapshot = await offersCollection.get();
-      final offers = offersSnapshot.docs.map((e) => RideOfferModel.fromJson(e.data())).toList();
+      final offers = offersSnapshot.docs
+          .map((e) => RideOfferModel.fromJson(e.data()))
+          .toList();
 
       return offers;
     } catch (e) {
@@ -445,7 +517,6 @@ class FirebaseFunctions {
   }
 
   static Future<String?> authUser(LoginData data) async {
-    debugPrint('Name: ${data.name}, Password: ${data.password}');
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: data.name,
@@ -456,61 +527,68 @@ class FirebaseFunctions {
       debugPrint(successMessage);
       return null;
     } catch (e) {
-      // Error occurred while signing in
       return 'Error signing in: $e';
     }
   }
 
   static Future<String?> signupUser(SignupData data) async {
-  debugPrint('Signup Name: ${data.name}, Password: ${data.password}');
-  try {
-    await Firebase.initializeApp(); // Initialize Firebase
-    UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      email: data.name!,
-      password: data.password!,
-    );
+    debugPrint('Signup Name: ${data.name}, Password: ${data.password}');
+    try {
+      await Firebase.initializeApp(); // Initialize Firebase
+      UserCredential userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: data.name!,
+        password: data.password!,
+      );
 
-    final db = FirebaseFirestore.instance;
+      final db = FirebaseFirestore.instance;
 
-    final user = UserModel(
-      email: data.name!,
-      createdAt: DateTime.now(),
-      firstName: data.additionalSignupData!['firstName']!,
-      lastName: data.additionalSignupData!['lastName']!,
-      chatRoomIds: ['default', Utils.getUserChannelId(data.name!)],
-      showFullName: true, // Added required parameter with default value
-    );
-    final userJson = user.toJson();
-    await db
-        .collection("users")
-        .doc(user.email)
-        .set(userJson)
-        .then((_) => debugPrint('DocumentSnapshot added with ID: ${user.email}'));
+      final user = UserModel(
+        email: data.name!,
+        createdAt: DateTime.now(),
+        firstName: data.additionalSignupData!['firstName']!,
+        lastName: data.additionalSignupData!['lastName']!,
+        chatRoomIds: ['default', Utils.getUserChannelId(data.name!)],
+        showFullName: true, // Added required parameter with default value
+      );
+      final userJson = user.toJson();
+      await db.collection("users").doc(user.email).set(userJson).then(
+          (_) => debugPrint('DocumentSnapshot added with ID: ${user.email}'));
 
-    final types.Room notificationChannel = types.Room(
-      id: user.messageChannelId(),
-      name: 'Notifications',
-      users: [types.User(id: user.email)],
-      type: types.RoomType.channel,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
-    );
-    final notificationChannelJson = notificationChannel.toJson();
-    await db
-        .collection("companies")
-        .doc(user.companyName)
-        .collection('chatRooms')
-        .doc(notificationChannel.id)
-        .set(notificationChannelJson);
+      final types.Room notificationChannel = types.Room(
+        id: user.messageChannelId(),
+        name: 'Notifications',
+        users: [types.User(id: user.email)],
+        type: types.RoomType.channel,
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+      );
+      final notificationChannelJson = notificationChannel.toJson();
+      await db
+          .collection("companies")
+          .doc(user.companyName)
+          .collection('chatRooms')
+          .doc(notificationChannel.id)
+          .set(notificationChannelJson);
 
-    // User added successfully
-    String successMessage = 'User ${userCredential.user} signed up successfully!';
-    debugPrint(successMessage);
-    return null;
-  } catch (e) {
-    // Error occurred while adding user
-    return ('Error adding user: $e');
+      // User added successfully
+      String successMessage =
+          'User ${userCredential.user} signed up successfully!';
+      debugPrint(successMessage);
+      return null;
+    } catch (e) {
+      debugPrint('Error during signup: $e');
+
+      // Rollback: Delete the user from Firebase Authentication if Firestore operations fail
+      User? currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        await currentUser.delete(); // Remove the partially created user
+        debugPrint('User ${currentUser.email} deleted due to signup failure.');
+      }
+
+      // Error occurred while adding user
+      return ('Error adding user: $e');
+    }
   }
-}
 
   static Future<String?> recoverPassword(String name) async {
     debugPrint('Name: $name');
@@ -530,37 +608,81 @@ class FirebaseFunctions {
 
   static Future<String?> deleteUserAccount(UserModel user) async {
     try {
-      await FirebaseFirestore.instance.collection('users').doc(user.email).delete();
-      await FirebaseAuth.instance.currentUser!.delete();
+      final firestore = FirebaseFirestore.instance;
+      final storage = firebase_storage.FirebaseStorage.instance;
 
+      final chatRoomsCollection = firestore
+          .collection('companies')
+          .doc(user.companyName)
+          .collection('chatRooms');
+      final rideOffersCollection = firestore
+          .collection('companies')
+          .doc(user.companyName)
+          .collection('rideOffers');
+
+      
+      final userDocRef = firestore.collection('users').doc(user.email);
+      final userSnapshot = await userDocRef.get();
+      if (!userSnapshot.exists) {
+        return "User not found";
+      }
+
+      final userData = userSnapshot.data()!;
+      final requestedOfferIds =
+          List<String>.from(userData['requestedOfferIds'] ?? []);
+
+      final userChatRoomRef = chatRoomsCollection.doc('${user.email}-channel');
+      final userChatRoomSnapshot = await userChatRoomRef.get();
+
+      final rideOffersSnapshot = await rideOffersCollection
+          .where('driverId', isEqualTo: user.email)
+          .get();
+
+      
+      WriteBatch batch = firestore.batch();
+      batch.delete(userDocRef);
+
+      if (userChatRoomSnapshot.exists) {
+        batch.delete(userChatRoomRef);
+      }
+
+      for (final rideOfferDoc in rideOffersSnapshot.docs) {
+        batch.delete(rideOfferDoc.reference);
+      }
+
+     
+      for (final offerId in requestedOfferIds) {
+        final rideOfferRef = rideOffersCollection.doc(offerId);
+        batch.update(rideOfferRef, {
+          'requestedUserIds.${user.email}': FieldValue.delete(),
+        });
+      }
+
+      await batch.commit();
+
+      
       try {
-        // Delete the user's profile image from Firebase Storage
-        final storage = firebase_storage.FirebaseStorage.instance;
-        final storageRef = storage.ref().child('profile_images/${user.email}.jpg');
+        final storageRef =
+            storage.ref().child('profile_images/${user.email}.jpg');
         await storageRef.delete();
       } catch (e) {
-        debugPrint(e.toString());
+        debugPrint("Error deleting profile image: ${e.toString()}");
+        
       }
 
-      final chatRoomsCollection =
-          FirebaseFirestore.instance.collection('companies').doc(user.companyName).collection('chatRooms');
-      final userChannelRoomsQuerySnapshot = await chatRoomsCollection.doc('${user.email}-channel').get();
-      if (userChannelRoomsQuerySnapshot.exists) {
-        await userChannelRoomsQuerySnapshot.reference.delete();
+      
+      User? currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null && currentUser.email == user.email) {
+        await currentUser.delete();
+      } else if (currentUser == null) {
+        debugPrint("No authenticated user to delete.");
       }
 
-      debugPrint('Deleting offer created by user ${user.email} from ${user.companyName}');
-      // Delete all ride offers created by the user
-      final rideOffersCollections =
-          FirebaseFirestore.instance.collection('companies').doc(user.companyName).collection('rideOffers');
-      final rideOffersQuerySnapshot = await rideOffersCollections.where('driverId', isEqualTo: user.email).get();
-      debugPrint('Deleting ${rideOffersQuerySnapshot.docs.length} ride offers created by ${user.email}');
-      for (final rideOfferSnapshot in rideOffersQuerySnapshot.docs) {
-        await rideOfferSnapshot.reference.delete();
-      }
+      debugPrint(
+          "User ${user.email} successfully deleted, including ${rideOffersSnapshot.docs.length} ride offers.");
       return null;
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint("Error deleting user: ${e.toString()}");
       return e.toString();
     }
   }
