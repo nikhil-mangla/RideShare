@@ -331,9 +331,10 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {
         final index =
             _messages.indexWhere((m) => m.id == placeholderMessage.id);
-        if (index != -1)
+        if (index != -1) {
           _messages[index] =
               placeholderMessage.copyWith(status: types.Status.error);
+        }
       });
     }
   }
@@ -382,9 +383,10 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {
         final index =
             _messages.indexWhere((m) => m.id == placeholderMessage.id);
-        if (index != -1)
+        if (index != -1) {
           _messages[index] =
               placeholderMessage.copyWith(status: types.Status.error);
+        }
       });
     }
   }

@@ -189,7 +189,7 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
                     title: 'Price',
                     content: widget.rideOffer.price == 0.0
                         ? 'Free'
-                        : '${widget.rideOffer.price.toStringAsFixed(2)}',
+                        : widget.rideOffer.price.toStringAsFixed(2),
                     icon: Icons.attach_money,
                   ),
                   if (widget.rideOffer.additionalDetails.isNotEmpty) ...[
