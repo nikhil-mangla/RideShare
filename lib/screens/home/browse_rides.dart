@@ -30,7 +30,7 @@ class _BrowseRidesState extends State<BrowseRides> {
   List<RideOfferModel> matchingRides = [];
   bool isSearching = false;
   String? errorMessage;
-  String? successMessage; // New variable for success message
+  String? successMessage; 
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
 
   Future<LatLng?> _getCoordinatesFromAddress(String address) async {
