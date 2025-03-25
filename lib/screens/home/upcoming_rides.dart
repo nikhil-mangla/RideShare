@@ -6,17 +6,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rideshare/models/ride_offer_model.dart';
 import 'package:rideshare/models/user_model.dart';
+import 'package:provider/provider.dart';
 
 class UpcomingRides extends StatefulWidget {
   final UserState userState;
   final Function() fetchAllOffers;
   final Function(int) changePageIndex;
 
-  const UpcomingRides(
-      {super.key,
-      required this.userState,
-      required this.fetchAllOffers,
-      required this.changePageIndex});
+  const UpcomingRides({
+    super.key,
+    required this.userState,
+    required this.fetchAllOffers,
+    required this.changePageIndex,
+  });
 
   @override
   UpcomingRidesState createState() => UpcomingRidesState();
@@ -30,9 +32,16 @@ class UpcomingRidesState extends State<UpcomingRides> {
 
   Future<void> fetchMyRequestedOffers() async {
     await widget.fetchAllOffers();
+    getMyRequestedOffers();
   }
 
   void getMyRequestedOffers() {
+    if (widget.userState.currentUser == null) {
+      setState(() {
+        myRequestedOffers = [];
+      });
+      return;
+    }
     final requestedOffers = widget.userState.storedOffers.entries
         .where((offer) =>
             widget.userState.currentUser!.requestedOfferIds.contains(offer.key))
@@ -49,6 +58,8 @@ class UpcomingRidesState extends State<UpcomingRides> {
   }
 
   Future<void> getDriverInfo(String driverId) async {
+    if (widget.userState.currentUser == null) return;
+
     if (driverId == widget.userState.currentUser!.email) {
       setState(() {
         drivers[driverId] = widget.userState.currentUser!;
@@ -72,9 +83,26 @@ class UpcomingRidesState extends State<UpcomingRides> {
   void initState() {
     super.initState();
     getMyRequestedOffers();
+    // Listen to UserState changes if it's a ChangeNotifier
+    if (widget.userState is ChangeNotifier) {
+      widget.userState.addListener(_onUserStateChanged);
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.userState is ChangeNotifier) {
+      widget.userState.removeListener(_onUserStateChanged);
+    }
+    super.dispose();
+  }
+
+  void _onUserStateChanged() {
+    getMyRequestedOffers();
   }
 
   String getDriverName(String driverId) {
+    if (widget.userState.currentUser == null) return 'Unknown';
     if (driverId == widget.userState.currentUser!.email) {
       return 'You';
     }
@@ -88,8 +116,16 @@ class UpcomingRidesState extends State<UpcomingRides> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.userState.currentUser == null) {
+      return const Center(
+        child: Text(
+          'Please log in to see your upcoming rides',
+          style: TextStyle(fontSize: 16, color: Colors.grey),
+        ),
+      );
+    }
+
     if (myRequestedOffers.isEmpty) {
-      // Show a message when there are no upcoming ride offers
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -124,7 +160,8 @@ class UpcomingRidesState extends State<UpcomingRides> {
         itemBuilder: (context, index) {
           final rideOffer = myRequestedOffers[index];
           final requestedOfferStatus =
-              rideOffer.requestedUserIds[widget.userState.currentUser!.email]!;
+              rideOffer.requestedUserIds[widget.userState.currentUser!.email] ??
+                  RequestedOfferStatus.PENDING;
 
           if (requestedOfferStatus == RequestedOfferStatus.INVALID) {
             return ListTile(
@@ -150,7 +187,7 @@ class UpcomingRidesState extends State<UpcomingRides> {
               children: [
                 Text(Utils.getShortLocationName(rideOffer.driverLocationName)),
                 Text(
-                  '${rideOffer.proposedLeaveTime!.format(context)} - ${rideOffer.proposedBackTime!.format(context)}',
+                  '${rideOffer.proposedLeaveTime?.format(context) ?? 'N/A'} - ${rideOffer.proposedBackTime?.format(context) ?? 'N/A'}',
                 ),
               ],
             ),

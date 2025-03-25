@@ -158,7 +158,7 @@ class _AddressSearchScreenState extends State<AddressSearchScreen> {
                       _streetNumber = placeDetails.streetNumber ?? '';
                       _street = placeDetails.street ?? '';
                       _city = placeDetails.city ?? '';
-                      _province = placeDetails.province ?? '';
+                      _province = placeDetails.state ?? '';
                       _postalCode = placeDetails.postalCode ?? '';
                     });
                   }

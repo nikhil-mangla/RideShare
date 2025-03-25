@@ -14,7 +14,7 @@ import 'package:provider/provider.dart';
 class RideOfferDetailScreen extends StatefulWidget {
   final UserState userState;
   final RideOfferModel rideOffer;
-  final GlobalKey? refreshOffersKey;
+  final GlobalKey<RefreshIndicatorState>? refreshOffersKey; // Made optional
 
   const RideOfferDetailScreen({
     super.key,
@@ -42,13 +42,10 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
   final Color textLight = const Color(0xFF757575);
 
   void refreshOffers() {
-    if (widget.refreshOffersKey is GlobalKey<RefreshIndicatorState>) {
-      final refreshOffersIndicatorKey =
-          widget.refreshOffersKey as GlobalKey<RefreshIndicatorState>;
-      refreshOffersIndicatorKey.currentState?.show();
+    if (widget.refreshOffersKey != null) {
+      widget.refreshOffersKey!.currentState?.show();
     } else {
-      debugPrint(
-          'widget.refreshOffersKey is not of type GlobalKey<RefreshIndicatorState>');
+      debugPrint('refreshOffersKey is null, no refresh triggered');
     }
   }
 
@@ -92,7 +89,10 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
     }
   }
 
-  Future<String> _getAddressFromLatLng(LatLng position) async {
+  Future<String> _getAddressFromLatLng(LatLng? position) async {
+    if (position == null) {
+      return widget.rideOffer.driverLocationName ?? 'Unknown Location';
+    }
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(
         position.latitude,
@@ -101,7 +101,6 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
 
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks[0];
-        // Create a more robust address format that handles nulls
         List<String> addressParts = [];
 
         if (place.street != null && place.street!.isNotEmpty) {
@@ -133,7 +132,34 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final userState = Provider.of<UserState>(context);
-    final UserModel currentUser = userState.currentUser!;
+    final UserModel? currentUser = userState.currentUser; // Null-safe access
+
+    if (currentUser == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Ride Details',
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [secondaryPurple, primaryPurple],
+              ),
+            ),
+          ),
+          elevation: 0,
+        ),
+        body: const Center(
+          child: Text(
+            'Please log in to view ride details',
+            style: TextStyle(fontSize: 18, color: Colors.grey),
+          ),
+        ),
+      );
+    }
+
     const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
     return Scaffold(
@@ -553,7 +579,7 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
-              color: Utils.requestStatusToColor(requestedOfferStatus!)
+              color: Utils.requestStatusToColor(requestedOfferStatus ?? RequestedOfferStatus.PENDING)
                   .withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
@@ -567,14 +593,14 @@ class RideOfferDetailScreenState extends State<RideOfferDetailScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Utils.requestStatusToIcon(requestedOfferStatus),
+                Utils.requestStatusToIcon(requestedOfferStatus ?? RequestedOfferStatus.PENDING),
                 const SizedBox(width: 8),
                 Text(
-                  'Status: ${describeEnum(requestedOfferStatus)}',
+                  'Status: ${describeEnum(requestedOfferStatus ?? RequestedOfferStatus.PENDING)}',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16.0,
-                    color: Utils.requestStatusToColor(requestedOfferStatus),
+                    color: Utils.requestStatusToColor(requestedOfferStatus ?? RequestedOfferStatus.PENDING),
                   ),
                 ),
               ],

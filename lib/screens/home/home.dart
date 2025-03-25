@@ -2,6 +2,7 @@ import 'package:rideshare/providers/user_state.dart';
 import 'package:rideshare/screens/chat/chat_list.dart';
 import 'package:rideshare/screens/home/upcoming_rides.dart';
 import 'package:rideshare/screens/home/my_offers.dart';
+import 'package:rideshare/screens/home/browse_rides.dart';
 import 'package:rideshare/widgets/notification_badge.dart';
 import 'package:flutter/material.dart';
 
@@ -9,8 +10,11 @@ class HomeScreen extends StatefulWidget {
   final Function(int) changePageIndex;
   final UserState userState;
 
-  const HomeScreen(
-      {super.key, required this.userState, required this.changePageIndex});
+  const HomeScreen({
+    super.key,
+    required this.userState,
+    required this.changePageIndex,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -42,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     if (widget.userState.storedOffers.isEmpty) fetchAllOffers();
   }
 
@@ -177,8 +181,9 @@ class _HomeScreenState extends State<HomeScreen>
                   indicatorSize: TabBarIndicatorSize.label,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   tabs: [
-                    const Tab(text: 'UPCOMING RIDES'),
-                    const Tab(text: 'MY OFFERS'),
+                    const Tab(text: 'BROWSE'), // Moved to first
+                    const Tab(text: 'UPCOMING RIDES'), // Moved to second
+                    const Tab(text: 'MY OFFERS'), // Moved to third
                   ],
                 ),
               ),
@@ -196,7 +201,14 @@ class _HomeScreenState extends State<HomeScreen>
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    // Upcoming Rides Tab
+                    // Browse Rides Tab (First)
+                    _buildTabContent(
+                      BrowseRides(
+                        userState: widget.userState,
+                        fetchAllOffers: fetchAllOffers,
+                      ),
+                    ),
+                    // Upcoming Rides Tab (Second)
                     _buildTabContent(
                       RefreshIndicator(
                         color: primaryPurple,
@@ -208,7 +220,7 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                       ),
                     ),
-                    // My Offers Tab
+                    // My Offers Tab (Third)
                     _buildTabContent(
                       RefreshIndicator(
                         color: primaryPurple,
@@ -225,9 +237,7 @@ class _HomeScreenState extends State<HomeScreen>
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigate to create offer screen
-          widget.changePageIndex(
-              1); // Assuming 1 is the index for the create offer page
+          widget.changePageIndex(1); // Navigate to create offer screen
         },
         backgroundColor: primaryPurple,
         foregroundColor: Colors.white,
@@ -248,7 +258,6 @@ class _HomeScreenState extends State<HomeScreen>
   }
 }
 
-// Enhanced Persistent Header Delegate for TabBar
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   _SliverAppBarDelegate(this._tabBar);
 
